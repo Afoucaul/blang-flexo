@@ -1,0 +1,78 @@
+\documentclass{article}
+
+\include{imtamm}
+
+\meetingno{1}
+\author{Armand Foucault}
+\date{27 octobre 2017}
+\title{Compte rendu de réunion}
+\subtitle{Rencontre client, établissement des besoins}
+
+\newcommand{\newactor}[2]{\expandafter\newcommand\csname actor#1\endcsname{#2}}
+\include{participants}
+
+\begin{document}
+
+\imtammMaketitle
+
+\section*{Participants}
+
+\begin{imtammActorList}
+\item \actorjcbach
+\item \actorabeugnard
+\item \actorasavary
+\item \actorafoucaul
+\end{imtammActorList}
+
+
+\section*{Discussion}
+
+\subsection*{Présentation du contexte}
+
+Ce projet s'inscrit dans le cadre du projet FORMOSE\footnote{%
+http://www.agence-nationale-recherche.fr/projet-anr/?tx\_lwmsuivibilan\_pi2\%5BCODE\%5D=ANR-14-CE28-0009}, %
+projet de recherche industrielle visant à la production d'une méthode formelle d'ingénierie des exigences.
+Parmi les outils au coeur de ce projet, se trouve notamment \textbf{OpenFlexo}\footnote{%
+https://www.openflexo.org/}, une méthode de création d'outils et d'unification de modèles.
+Le client travaille avec OpenFlexo pour représenter ses preuves formelles reposant sur la \textbf{méthode B}.
+L'outil qu'il développe à travers OpenFlexo interagit avec un prouveur B, qui génère et vérifie les preuves conçues avec cet outil.
+
+\subsection*{Expression des attentes}
+
+Dans le cadre du projet FORMOSE, la méthode B n'était pas parfaitement appropriée.
+Le client s'est ainsi tourné vers la version événementielle de B, appelée Event B.
+Aujourd'hui, le client ne tire pas pleine satisfaction de la méthode Event B.
+En particulier, les obligations de preuve proposées par Event B ne correspondent pas à la philosophie du projet Formose.
+Par conséquent, le client souhaite modifier certains aspects de la méthode Event B, afin de l'orienter vers la modélisation de buts (\textit{goal modeling}).
+
+Pour mettre en oeuvre la méthode B, le client utilise le logiciel \textbf{Atelier B}.
+Cependant, il s'agit d'un logiciel propriétaire, dont la modification pourrait s'avérer compliquée, et requerrait trop de temps.
+Il existe un autre outil de déploiement de la méthode B, nommé \textbf{Rodin}.
+Ce dernier est un projet open-source, conçu pour accueillir des plugins développés en Java.
+L'intégration d'une nouvelle version de la méthode B à cet outil est donc a priori accessible.
+
+Finalement, nous nous attacherons à la conception d'un plugin Java pour Rodin.
+L'objectif est donc avant tout de réaliser une preuve de concept de la nouvelle version de la méthode B souhaitée par le client.
+Par ailleurs, le client réalisant principalement ses modèles depuis OpenFlexo, il est souhaité que la nouvelle version de Rodin s'interface avec ce dernier.
+À cette fin, il sera nécessaire de réaliser un \textbf{Technology Adapter}, qui permettra à OpenFlexo d'interagir avec Rodin.
+
+
+\section*{À venir}
+
+Pour la mi-novembre 2017, rédaction d'un document comprenant :
+
+\begin{itemize}
+    \item Les objectifs du projet
+    \item Le plan de travail
+    \item Les références bibliographiques
+\end{itemize}
+
+\noindent D'ici décembre 2017 :
+
+\begin{itemize}
+\item Comprendre le contexte du projet et les exigences du client
+\item Décider de comment le Technology Adapter sera réalisé
+\item Expliciter la forme, les fonctionnalités... du produit final
+\end{itemize}
+
+\end{document}
