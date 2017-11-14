@@ -1,0 +1,78 @@
+\documentclass{article}
+
+\include{imtamm}
+\usepackage{hologo}
+
+\meetingno{2}
+\author{Armand Foucault}
+\date{13 novembre2017}
+\title{Compte rendu de réunion}
+\subtitle{Retour sur le rapport court}
+
+\newcommand{\newactor}[2]{\expandafter\newcommand\csname actor#1\endcsname{#2}}
+\include{participants}
+
+\begin{document}
+
+\imtammMaketitle
+
+\section*{Participants}
+
+\begin{imtammActorList}
+\item \actorjcbach
+\item \actorafoucaul
+\end{imtammActorList}
+
+
+\section*{Discussion}
+
+\subsection*{Présentation du contexte}
+
+Le premier livrable est à livrer pour le 17 novembre 2017.
+Il s'agit d'un rapport court, comprenant :
+
+\begin{itemize}
+    \item La contextualisation du projet ;
+    \item Une reformulation du problème ;
+    \item Une bibliographie ;
+    \item Une analyse du problème ;
+    \item Un plan de travail prévisionnel.
+\end{itemize}
+
+Une première version de ce rapport court ayant été produite, M. Jean-Christophe Bach fait part de ses remarques pour la version suivante.
+
+\subsection*{Éléments à étoffer}
+
+\subsubsection*{Contextualisation du projet}
+
+Le contexte du projet FORMOSE doit être explicité.
+En particulier, celui-ci lie l'ingénierie des exigences, souvent en langage naturel, et l'univers de la preuve formelle.
+De ce fait, il est naturel que le projet FORMOSE fasse appel à OpenFlexo, dont l'objet est de fédérer les univers conceptuels.
+
+L'essence d'OpenFlexo est également à préciser.
+Il s'agit d'une infrastructure permettant de fédérer des modèles, jouant le rôle de glue entre des univers de formalismes bien distincts.
+C'est donc un outil de choix pour créer le lien entre l'ingénierie des exigences et la preuve formelle.
+
+\subsubsection*{Objectifs du projet}
+
+Il faut ajouter aux objectifs du projet la compréhension et la formalisation de la preuve formelle B.
+En effet, ce projet est très libre, et les différents univers doivent être clairement définis.
+Ainsi, il faut mettre en avant la phase de recherche, qui précède toute implémentation, et qui permettra de conceptualiser ce qu'est une preuve B.
+
+\subsubsection*{Plan de travail prévisionnel}
+
+Il serait bon d'expliciter les tâches, en ajoutant une sous-section pour chacune d'entre elles.
+Ainsi, les dépendances entre les tâches pourraient être mises en évidence.
+Se posent de plus les questions de l'intégration, des tests, et de la documentation.
+Il faut montrer l'existence de ces questions dans le détail des tâches, et expliquer ce qui est prévu.
+Enfin, il serait judicieux de préciser que certaines tâches pourraient être amenées à changer, voire à disparaître, au cours de l'avancée du projet.
+
+\subsubsection*{Bibliographie}
+
+La bibliographie devrait être réalisée avec le package \hologo{BibTeX} pour \LaTeX.
+
+\section*{À venir}
+
+Pour le 15 novembre, rédaction de la nouvelle version du rapport court.
+
+\end{document}
