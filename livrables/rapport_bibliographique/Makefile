@@ -1,6 +1,6 @@
 DOCUMENT = rapport_bibliographique
 
-$(DOCUMENT).pdf: $(DOCUMENT).tex $(DOCUMENT).bib
+$(DOCUMENT).pdf: $(DOCUMENT).tex
 	pdflatex -shell-escape $(DOCUMENT).tex
 	biber $(DOCUMENT)
 	pdflatex -shell-escape $(DOCUMENT)
