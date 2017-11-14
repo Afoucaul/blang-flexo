@@ -1,0 +1,233 @@
+\documentclass{article}
+
+\usepackage{imta_core}
+\usepackage{imta_extra}
+\usepackage{adjustbox}
+\usepackage[backend=biber, sorting=none]{biblatex}
+\usepackage[francais]{babel}
+
+\usepackage{csquotes}
+\addbibresource{rapport_bibliographique.bib}
+
+\author{Armand Foucault}
+\date{Novembre 2017}
+\title{Métamodélisation du langage B et \mbox{interactions} avec un prouveur B}
+\subtitle{Plan de travail, rapport bibliographique}
+
+% \imtaSetIMTStyle
+
+\newcommand{\rawHref}[1]{\hspace{0.2em}\textcolor{imtaLightBlue}{\href{#1}{#1}}\hspace{0.2em}}
+\usepackage{colortbl}
+\newcolumntype{L}[1]{>{\raggedright\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+\newcolumntype{C}[1]{>{\centering\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+\newcolumntype{R}[1]{>{\raggedleft\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+\colorlet{Header}{imtaGreen}
+\definecolor{Task}{RGB}{209, 231, 151}
+\definecolor{Subtask}{RGB}{236, 245, 214}
+% \colorlet{Header}{imtaLightBlue}
+% \definecolor{Task}{RGB}{179, 242, 255}
+% \definecolor{Subtask}{RGB}{230, 251, 255}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+%%%%%%%%%% BEGINNING %%%%%%%%%% 
+\begin{document}
+
+\imtaMaketitlepage
+
+\tableofcontents
+
+\newpage
+
+% PRESENTATION DU PROJET
+
+\section{Présentation du projet}
+
+\subsection{Contexte}
+
+Ce projet s'inscrit dans le cadre du projet Formose, dont l'objectif est de concevoir une méthode formelle pour l'ingénierie %
+des exigences, soutenue par un écosystème open-source.
+Le projet Formose s'attache à créer un lien entre l'univers de l'ingénierie des exigences, lié par essence au langage naturel, %
+et celui de la preuve formelle, reposant sur un formalisme mathématique strict.
+Afin de connecter ces deux univers, le projet Formose fait appel à OpenFlexo, une infrastructure logicielle open-source, permettant de fédérer les modèles.
+OpenFlexo joue en quelque sorte le rôle de glue entre les univers, et permet en l'occurrence de bâtir un pont entre l'ingénierie des exigences et la preuve formelle.
+
+Dans le cadre du projet Formose, le client se repose sur la méthode B, et sa version évènementielle, Event-B, pour la rédaction de preuves formelles.
+Cependant, ces méthodes se sont avérées peu cohérentes dans leur approche avec la philosophie du projet.
+Ainsi, le client souhaite développer une nouvelle méthode formelle, dérivée de la méthode B, et pilotée par la spécification de buts.
+Dans cette optique, le client a déjà modélisé les nouvelles obligations de preuve, et souhaite dorénavant une implémentation de cette nouvelle méthode dans l'assistant logiciel qu'il utilise.
+
+\subsection{Objectifs}
+
+Ce projet est vaste, et laisse une grande liberté, la nouvelle méthode formelle conçue par le client n'étant pas encore complètement spécifiée.
+Ainsi, avant toute implémentation, il sera nécessaire de comprendre la méthode B, et de conceptualiser ce qu'est une preuve formelle en langage B.
+
+Une fois cette formalisation faite, viendra l'implémentation de cette nouvelle méthode dans l'assistant logiciel de preuve.
+L'outil privilégié par le client est Atelier B, l'assistant officiel de la méthode B.
+Cependant, ce logiciel étant propriétaire, il a été convenu de s'orienter vers Rodin, son pendant open-source, dont le développement de plugins est bien plus accessible.
+
+Enfin, il faudra connecter la nouvelle version de Rodin avec OpenFlexo.
+À cette fin, un \textit{technology adapter} devra être conçu et implémenté dans OpenFlexo.
+L'intérêt de disposer d'une telle interface est de rendre la communication entre OpenFlexo et Rodin dynamique : une modification dans le premier peut être répercutée instantanément %
+dans le second, qui peut répondre après traitement au premier.
+
+À la lumière de ces éléments, ce projet consiste donc en trois objectifs :
+
+\vspace{\baselineskip}
+\begin{itemize}
+    \item La formalisation d'une preuve en langage B
+    \item L'implémentation d'un plugin Rodin capable de lire les nouvelles obligations de preuve conçues par le client
+    \item La réalisation d'un technology adapter connectant OpenFlexo avec Rodin
+\end{itemize}
+
+\newpage
+
+
+% PLAN DE TRAVAIL
+
+\section{Plan de travail}
+
+Les axes principaux de ce projet sont les suivants :
+
+\vspace{\baselineskip}
+\begin{itemize}
+    \item Compréhension du formalisme et de la théorie de la méthode B
+    \item Manipulation et compréhension de Rodin
+    \item Manipulation et compréhension d'OpenFlexo
+    \item Conception d'un plugin Rodin pour la lecture des nouvelles obligations de preuve
+    \item Implémentation d'un technology adapter pour l'interfaçage d'OpenFlexo avec Rodin
+\end{itemize}
+\vspace{\baselineskip}
+
+Voici le plan de travail prévisionnel pour le déroulement du projet :
+
+\vspace{\baselineskip}
+
+\begin{adjustbox}{center}
+    \def\arraystretch{1.2}
+    \begin{tabular}{| L{0.55\linewidth} C{\linewidth/7} R{0.14\linewidth}  L{0.13\linewidth} |}
+        \hline
+        \rowcolor{Header}\multicolumn{1}{|c}{Tâche} & \multicolumn{1}{c}{Temps consacré} & \multicolumn{1}{r}{Du} & \multicolumn{1}{l|}{Au}\\ \hline \hline
+
+        \rowcolor{Task}Compréhension de la méthode B & 2 semaines & 6 novembre & 17 novembre\\
+        \rowcolor{Subtask}\qquad Lecture du cours de Marie-Laure Potet & 2 semaines & 6 novembre & 17 novembre\\ \hline
+
+        \rowcolor{Task}Familiarisation avec Rodin & 2 semaines & 20 novembre & 1\(^{er}\) décembre\\
+        \rowcolor{Subtask}\qquad Étude des exercices du Rodin Handbook & 2 semaines & 20 novembre & 1\(^{er}\) décembre\\ \hline
+
+        \rowcolor{Task}Familiarisation avec OpenFlexo & 3 semaines & 4 décembre & 22 décembre\\
+        \rowcolor{Subtask}\qquad Étude de Free Modeling Editor et de Viewpoint Modeler & 1 semaine & 4 décembre & 8 décembre\\
+        \rowcolor{Subtask}\qquad Étude de Smartdocs & 1 semaine & 11 décembre & 15 décembre\\
+        \rowcolor{Subtask}\qquad Étude de View Editor & 1 semaine & 18 décembre & 22 décembre\\ \hline
+
+        \rowcolor{Task}Conception d'un plugin Rodin & 5 semaines & 8 janvier & 9 février \\
+        \rowcolor{Subtask}\qquad Compréhension des nouvelles obligations de preuve & 1 semaine & 8 janvier & 12 janvier\\
+        \rowcolor{Subtask}\qquad Étude du tutoriel d'Aymerick Savary pour Rodin & 1 semaine & 15 janvier & 19 janvier\\
+        \rowcolor{Subtask}\qquad Développement du plugin & 3 semaines & 22 janvier & 9 février\\ \hline
+
+        \rowcolor{Task}Implémentation d'un technology adapter OpenFlexo & 4 semaines & 12 février & 9 mars\\
+        \rowcolor{Subtask}\qquad Étude de technoloy adapters existants & 1 semaine & 12 février & 16 février\\
+        \rowcolor{Subtask}\qquad Développement du technology adapater & 3 semaines & 19 février & 9 mars\\ \hline \hline
+
+        \rowcolor{Header}\multicolumn{1}{|c}{Total} & \multicolumn{1}{c}{17 semaines} & 6 novembre 17 & 9 mars 18\\ \hline
+
+    \end{tabular}
+\end{adjustbox}
+
+\subsection{Compréhension de la méthode B}
+
+Il s'agit de comprendre la théorie mathématique sur laquelle repose la méthode B.
+Pour cela, le cours de Marie-Laure Potet \cite{mlpotet} fournit, en plus d'une introduction à Atelier B, une présentation des axiomes et des outils que le formalisme %
+de la méthode B met à notre disposition.
+La page Wikipédia de la méthode B \cite{wikibmethod} fournira des informations complémentaires.
+Il n'est pas nécessaire de comprendre en profondeur la théorie de la méthode B, mais en saisir les bases permettra une meilleure formalisation d'une preuve en langage B.
+
+\subsection{Familiarisation avec Rodin}
+
+L'un des objectifs étant l'implémentation d'un plugin Rodin, il est nécessaire de connaître les rudiments du développement avec Rodin.
+Pour ce faire, le guide utilisateur de Rodin \cite{rodinuserguide} offre une courte présentation permettant une prise en main des bases de l'outil.
+De plus, le Rodin Handbook \cite{rodinuserhandbook} propose des exercices, qui permettront de manipuler Rodin, mais aussi d'assimiler les concepts de la méthode B en les appliquant.
+Le wiki officiel de Rodin et de la méthode Event-B \cite{rodinwiki} sera également un support utile. 
+
+\subsection{Familiarisation avec OpenFlexo}
+
+OpenFlexo est une infrastructure composée de nombreux outils, permettant de manipuler les différents modèles de données à disposition afin de les fédérer.
+La compréhension de ces outils, à l'aide des tutoriels disponibles sur le site d'OpenFlexo \cite{openflexodoc}, permettra de mieux appréhender la portée de cet écosystème.
+
+\subsection{Conception d'un plugin Rodin}
+
+Ayant étudié au préalable l'outil Rodin, la conception d'un plugin implémentant la nouvelle méthode formelle pourra commencer.
+Il faudra tout d'abord comprendre les attentes exactes du client, ce qui sera rendu plus aisé par la connaissance des outils et la compréhention de la méthode B.
+Ensuite, le tutoriel d'Aymerick Savary \cite{asavary} permettra d'appréhender les bases du développement pour Rodin.
+Enfin viendra le développement réel du plugin, accompagné de tests et de la rédaction d'une documentation au fur et à mesure.
+
+\subsection{Implémentation d'un technology adapter OpenFlexo}
+
+Une fois le plugin Rodin implémenté et fonctionnel, un technology adapter devra être réalisé, pour permettre à OpenFlexo de communiquer avec la nouvelle méthode formelle.
+Le site officiel d'OpenFlexo \cite{openflexodoc} propose déjà plusieurs technology adapters, qui seront dans un premier temps à étudier pour comprendre leur fonctionnement.
+Enfin, le technology adapter réel sera développé, testé, et documenté.
+
+
+\section{Outils}
+
+Au cours de ce projet, différents outils logiciels seront utilisés.
+
+\subsection{Git}
+
+\subsection{\LaTeX}
+
+\subsection{Rodin}
+
+
+\newpage
+
+\nocite{*}
+
+\printbibheading[title=Références, heading=bibintoc]
+
+\printbibliography[keyword=bmethod, heading=subbibintoc, title={Méthode B}]
+
+\printbibliography[keyword=rodin, heading=subbibintoc, title={Rodin}]
+
+\printbibliography[keyword=openflexo, heading=subbibintoc, title={OpenFlexo}]
+
+
+% % REFERENCES BIBLIOGRAPHIQUES
+% 
+% \section{Références bibliographiques}
+% 
+% \subsection{Théorie de la méthode B}
+% 
+% \begin{itemize}
+%     \item The B Method, Marie-Laure Potet, 2011 \\ \rawHref{http://www-verimag.imag.fr/\textasciitilde{}potet/ejcp-expose.pdf}
+%     \item Méthode B, Wikipédia \\ \rawHref{https://fr.wikipedia.org/wiki/Méthode\_B}
+% \end{itemize}
+% 
+% \subsection{Rodin}
+% 
+% \begin{itemize}
+%     \item Guide utilisateur Rodin, methode-b.com \\ \rawHref{http://www.methode-b.com/outils/rodin/guide-utilisateur/}
+%     \item Wiki de la méthode Event-B et de Rodin \\ \rawHref{http://wiki.event-b.org/index.php/Main\_Page}
+%     \item Rodin User's Handbook \\ \rawHref{http://www3.hhu.de/stups/handbook/rodin/current/html/tutorial.html}
+%     \item Développer pour Rodin, Aymerick Savary \\ \rawHref{http://blog.aymericksavary.fr/?p=557}
+% \end{itemize}
+% 
+% \subsection{OpenFlexo}
+% 
+% \begin{itemize}
+%     \item Documentation officielle, openflexo.org \\ \rawHref{https://developers.openflexo.org/developers/documentation.html}
+% \end{itemize}
+% 
+% % OUTILS
+% 
+% \section{Outils}
+% 
+% \begin{itemize}
+%     \item \LaTeX : rédaction des documents
+%     \item Rodin : manipulation et compréhension de la méthode B
+%     \item Git : suivi du code et des documents de gestion de projet
+% \end{itemize}
+
+\end{document}
+%%%%%%%%%% END %%%%%%%%%% 
+%%%%%%%%%%%%%%%%%%%%%%%%% 
