@@ -53,7 +53,8 @@ Afin de connecter ces deux univers, le projet Formose fait appel à OpenFlexo, u
 OpenFlexo permet en l'occurrence de bâtir un pont entre l'ingénierie des exigences et la preuve formelle.
 
 Dans le cadre du projet Formose, le client se repose sur la méthode B, et sa version évènementielle, Event-B, pour la rédaction de preuves formelles.
-Cependant, il manque à ces méthodes des constructions et des expressions pour traduire plus naturellement les spécifications propres au projet Formose.
+Cependant, le projet Formose se place dans le réferentiel de l'ingénierie des exigences, et il manque à ces méthodes des constructions et des expressions %
+pour traduire plus naturellement les spécifications liées à ce réferentiel.
 Le client souhaite ainsi développer une nouvelle méthode formelle, dérivée comme Event-B de la méthode B, mais pilotée par la spécification de buts.
 L'idée est donc de modifier la méthode B, dont la philosophie convient déjà au projet, afin de lui apporter l'expressivité dont le projet Formose a besoin.
 Dans cette optique, le client a déjà modélisé les nouvelles obligations de preuve, et souhaite dorénavant une implémentation de cette nouvelle méthode dans l'assistant logiciel qu'il utilise.
@@ -77,7 +78,7 @@ dans le second, qui peut répondre après traitement au premier.
 \vspace{\baselineskip}
 \begin{itemize}
     \item La formalisation d'une preuve en langage B
-    \item L'implémentation d'un plugin Rodin capable de lire les nouvelles obligations de preuve conçues par le client
+    \item L'implémentation d'un plugin Rodin capable de lire les nouvelles obligations de preuve et de gérer diverses opérations propres à la nouvelle méthode dérivée de B
     \item La réalisation d'un technology adapter connectant OpenFlexo avec Rodin
 \end{itemize}
 
@@ -167,6 +168,7 @@ Enfin viendra le développement réel du plugin, accompagné de tests et de la r
 Une fois le plugin Rodin implémenté et fonctionnel, un technology adapter devra être réalisé, pour permettre à OpenFlexo de communiquer avec la nouvelle méthode formelle.
 Le site officiel d'OpenFlexo \cite{openflexodoc} propose déjà plusieurs technology adapters, qui seront dans un premier temps à étudier pour comprendre leur fonctionnement.
 Enfin, le technology adapter réel sera développé, testé, et documenté.
+
 
 \section{Outils}
 
