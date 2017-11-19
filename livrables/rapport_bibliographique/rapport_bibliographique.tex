@@ -176,13 +176,19 @@ Au cours de ce projet, différents outils logiciels seront utilisés.
 
 \subsection{Git}
 
-Git sera utilisé pour gérer le versionnage du code et des documents rédigés en \LaTeX.
+Dans un souci de cohérence avec les outils utilisés par OpenFlexo, Git sera utilisé pour gérer le versionnage du code et des documents rédigés en \LaTeX.
 Le dépôt est hébergé sur la plateforme Redmine d'IMT Atlantique, et disponible à l'adresse suivante : \href{%
     https://redmine-df.telecom-bretagne.eu/git/blang-metamodelisation}{https://redmine-df.telecom-bretagne.eu/git/blang-metamodelisation}.
 
 \subsection{\LaTeX}
 
 Les livrables seront rédigés en \LaTeX, afin de produire les documents de la meilleure qualité possible, et pour rendre aisé leur suivi.
+Seules les sources en \imtaInlinecode{bash}{.tex}, \imtaInlinecode{bash}{.sty} et éventuellement \imtaInlinecode{bash}{.bib} seront suivies sur le Git.
+Un \imtaInlinecode{bash}{Makefile} sera inclus dans les répertoires contenant des documents, afin de faciliter la recompilation avec la commande \imtaInlinecode{bash}{make}.
+
+\subsection{OpenFlexo}
+
+L'infrastructure OpenFlexo sera utilisée en tant qu'environnement où sera développé le technology adapter.
 
 \subsection{Redmine}
 
