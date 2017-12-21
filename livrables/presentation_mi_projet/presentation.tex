@@ -1,0 +1,64 @@
+\documentclass{beamer}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[french]{babel}
+
+\title[Métamodélisation du langage B]{Métamodélisation du langage B\\ et interaction avec un prouveur B}
+\author{Armand FOUCAULT}
+\date{22 décembre 2017}
+
+\usetheme{Warsaw}
+
+\addtobeamertemplate{navigation symbols}{}{%
+    \usebeamerfont{footline}%
+    \usebeamercolor[fg]{footline}%
+    \hspace{1em}%
+    \insertframenumber/\inserttotalframenumber
+}
+
+\AtBeginSection[]
+{
+    \begin{frame}
+        \frametitle{Sommaire}
+        \tableofcontents[currentsection, hideothersubsections, pausesubsections]
+    \end{frame} 
+}
+
+\begin{document}
+
+\begin{frame}
+    \titlepage
+\end{frame}
+
+\begin{frame}
+    \tableofcontents
+\end{frame}
+
+\section{Section 1}
+
+\begin{frame}
+    \frametitle{title}
+    \framesubtitle{subtitle}
+    Body
+\end{frame}
+
+\section{Section 2}
+
+\subsection{Sous-section 1}
+
+\begin{frame}
+    \frametitle{title}
+    \framesubtitle{subtitle}
+    Body
+\end{frame}
+
+\subsection{Sous-section 2}
+
+\begin{frame}
+    \frametitle{title}
+    \framesubtitle{subtitle}
+    Body
+\end{frame}
+
+\end{document}
