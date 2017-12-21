@@ -1,8 +1,17 @@
-\documentclass{beamer}
+\documentclass[aspectratio=169]{beamer}
 
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
 \usepackage[french]{babel}
+\usepackage{colortbl}
+
+\newcolumntype{L}[1]{>{\raggedright\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+\newcolumntype{C}[1]{>{\centering\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+\newcolumntype{R}[1]{>{\raggedleft\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+
+\definecolor{Header}{RGB}{164, 210, 51}
+\definecolor{Task}{RGB}{209, 231, 151}
+\definecolor{Subtask}{RGB}{236, 245, 214}
 
 \title[Métamodélisation du langage B]{Métamodélisation du langage B\\ et interaction avec un prouveur B}
 \author{Armand FOUCAULT}
@@ -21,7 +30,7 @@
 {
     \begin{frame}
         \frametitle{Sommaire}
-        \tableofcontents[currentsection, hideothersubsections, pausesubsections]
+        \tableofcontents[currentsection, hideothersubsections]
     \end{frame} 
 }
 
@@ -35,7 +44,7 @@
     \tableofcontents
 \end{frame}
 
-\section{Section 1}
+\section[]{Section 1}
 
 \begin{frame}
     \frametitle{title}
@@ -43,22 +52,47 @@
     Body
 \end{frame}
 
-\section{Section 2}
-
-\subsection{Sous-section 1}
+\section[]{Travail dans le cadre du projet}
 
 \begin{frame}
-    \frametitle{title}
-    \framesubtitle{subtitle}
-    Body
+    \frametitle{Plan de travail prévisionnel}
+
+    \footnotesize
+
+    \begin{table}
+    \centering
+    \begin{tabular}{| l c |}
+        \hline
+        \rowcolor{Header}\multicolumn{1}{|c}{Tâche} & À partir du \\ \hline \hline
+
+        \rowcolor{Task}Compréhension de la méthode B & 6 novembre \\
+        \rowcolor{Subtask}\qquad Lecture du cours de Marie-Laure Potet & 6 novembre \\ \hline
+
+        \rowcolor{Task}Familiarisation avec Rodin & 20 novembre \\
+        \rowcolor{Subtask}\qquad Étude des exercices du Rodin Handbook & 20 novembre \\ \hline
+
+        \rowcolor{Task}Familiarisation avec OpenFlexo & 4 décembre \\
+        \rowcolor{Subtask}\qquad Étude de Free Modeling Editor et de Viewpoint Modeler & 4 décembre \\
+        \rowcolor{Subtask}\qquad Étude de Smartdocs & 11 décembre \\
+        \rowcolor{Subtask}\qquad Étude de View Editor & 18 décembre \\ \hline
+
+        \rowcolor{Task}Conception d'un plugin Rodin & 8 janvier \\
+        \rowcolor{Subtask}\qquad Compréhension des nouvelles obligations de preuve & 8 janvier \\
+        \rowcolor{Subtask}\qquad Étude du tutoriel d'Aymerick Savary pour Rodin & 15 janvier \\
+        \rowcolor{Subtask}\qquad Développement du plugin & 22 janvier \\ \hline
+
+        \rowcolor{Task}Implémentation d'un technology adapter OpenFlexo & 12 février \\
+        \rowcolor{Subtask}\qquad Étude de technoloy adapters existants & 12 février \\
+        \rowcolor{Subtask}\qquad Développement du technology adapater & 19 février \\ \hline \hline
+
+        \rowcolor{Task}\multicolumn{1}{|c}{Fin} & 9 mars \\ \hline
+
+    \end{tabular}
+    \end{table}
 \end{frame}
 
-\subsection{Sous-section 2}
-
 \begin{frame}
-    \frametitle{title}
-    \framesubtitle{subtitle}
-    Body
+    \frametitle{Travail effectué}
 \end{frame}
 
 \end{document}
