@@ -1,0 +1,73 @@
+\documentclass{article}
+
+\include{imtamm}
+\usepackage{hologo}
+
+\meetingno{3}
+\author{Armand Foucault}
+\date{1er février 2018}
+\title{Compte rendu de réunion}
+\subtitle{Redéfinition des objectifs}
+
+\newcommand{\newactor}[2]{\expandafter\newcommand\csname actor#1\endcsname{#2}}
+\include{participants}
+
+\begin{document}
+
+\imtammMaketitle
+
+\section*{Participants}
+
+\begin{imtammActorList}
+\item \actorasavary
+\item \actorjcbach
+\item \actorafoucaul
+\end{imtammActorList}
+
+
+\section*{Discussion}
+
+\subsection*{Présentation du contexte}
+Suite à la présentation du rapport court du 18 décembre 2017, il ressort que les objectifs du projet sont à revoir.
+En particulier, dans l'optique de s'assurer qu'une réalisation pourra être effectuée, il est nécessaire de reconsidérer ce qui peut être fait dans le temps imparti.
+Par ailleurs, des clarifications de la part de M. Aymerick Savary sont attendues, concernant le travail de métamodélisation de la méthode Event-B qu'il a mené dans le cadre du projet FORMOSE.
+
+\subsection*{Clarifications quant à la métamodélisation d'Event-B}
+M. Aymerick Savary explique que l'extension de la méthode Event-B, qu'il nomme \textbf{Goal-B}, conçue dans le cadre du projet FORMOSE ajoute au langage associé des constructions complexes, %
+qui ne sont pas que du simple sucre syntaxique.
+Cette extension repose en réalité sur une réinterprétation partielle des concepts existant dans la méthode Event-B.
+Afin de pouvoir utliser la méthode Goal-B depuis OpenFlexo, M. Aymerick Savary a donc implémenté un métamodèle OpenFlexo du langage Event-B, ainsi qu'un métamodèle du langage Goal-B.
+Cette implémentation permet de rester très générique, tout en exprimant les concepts de la méthode Goal-B à travers le métamodèle Event-B.
+
+Le métamodèle Event-B ayant été complètement réalisé, la partie "Métamodélisation du langage B" du projet ne fait plus partie des objectifs.
+Le cœur de ce projet devient alors l'établissement d'une communication, sous la forme d'un Technology Adapter, entre le métamodèle Event-B d'OpenFlexo, et Rodin.
+
+\subsection*{Définition du Technology Adapater}
+Le Technology Adapter souhaité dans le cadre de ce projet ne se préoccupe plus des problématiques de l'extension Goal-B, puisque celle-ci est conçue comme une réinterprétation de la méthode Event-B.
+L'objectif est dont d'implémenter une communication bidirectionnelle, permettant de manipuler dans OpenFlexo les concepts de la méthode Event-B, en s'appuyant sur le moteur de Rodin.
+
+Les fonctionnalités de ce Technology Adapter sont définies à travers un ensemble de scénarios, qui permettront la validation du projet.
+Ces scénarios se divisent en deux catégories, chacune représentant un sens de la communication OpenFlexo \(\leftrightarrow\) Rodin.
+
+Les scénarios de communication d'OpenFlexo vers Rodin mettront en œuvre la création d'éléments de Rodin (modèles, machines, invariants...) sous OpenFlexo, et la répercussion %
+de cette création dans le modèle Rodin.
+Des scénarios plus avancés pourront faire intervenir la modification et la suppression d'éléments,
+
+Les scénarios de communication de Rodin vers OpenFlexo consisteront en la génération et le calcul d'\textbf{obligations de preuve} par Rodin, et la transmission de celles-ci vers OpenFlexo.
+
+
+\section*{Livrables}
+À l'issue de cette réunion, nous proposons, en tant que livrables finaux du projet, les documents et produits suivants :
+
+\begin{itemize}
+    \item Un Technology Adapter, établissant une communication entre OpenFlexo et Rodin ;
+    \item Une compilation de scénarios de validation du Technology Adapter, accompagnés de leur diagramme de séquence ;
+    \item Un rapport technique, retraçant le développement du Technology Adapter, rédigé en \LaTeX.
+\end{itemize}
+
+
+\section*{À venir}
+Pour le 15 février, production d'un poster présentant le contexte et l'objectif du projet pour la journée portes ouvertes.
+
+
+\end{document}
