@@ -1,4 +1,7 @@
-TARGETS := $(shell find . -name "*CR*tex")
+SRCS=$(wildcard *CR*.tex)
+OBJS=$(SRCS:.tex=.pdf)
 
-all:
-	pdflatex $(TARGETS)
+all: $(OBJS)
+
+%.pdf: %.tex
+	pdflatex $<
