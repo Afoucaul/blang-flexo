@@ -9,10 +9,9 @@ Nous commençons par télécharger le package d'Eclipse
 \footnote{À l'heure de la rédaction de ce document, la liste de packages disponibles se trouve sur le site d'Eclipse, %
 à l'adresse \href{https://www.eclipse.org/downloads/eclipse-packages/}{https://www.eclipse.org/downloads/eclipse-packages/}
 } dédié au développement de RCP\footnote{Les applications client "riches"}.
-
 Après installation, nous lançons Eclipse, et créons un nouveau projet \textit{via} le menu \textit{File > New > Plug-in Project}.
-Nous appelons notre projet \textit{HelloWorldPlugin}\ref{fig:newPlugin1}, cliquons deux fois sur \textit{Next}, et arrivons sur la page de sélection du modèle de plugin\ref{fig:newPlugin3}.
-Nous choisissons \textit{Hello, World Command} afin de voir la base d'un plugin.
+Nous appelons notre projet \textit{HelloWorldPlugin} (figure \ref{fig:newPlugin1}), cliquons deux fois sur \textit{Next} pour arriver %
+sur la page de sélection du modèle de plugin (figure \ref{fig:newPlugin3}), et choisissons \textit{Hello, World Command} afin de voir la base d'un plugin.
 
 
 \begin{figure}[H]
@@ -21,7 +20,6 @@ Nous choisissons \textit{Hello, World Command} afin de voir la base d'un plugin.
     \qquad
 \subfloat[Création d'un nouveau plugin - 2/4]{{\includegraphics[width=0.4\linewidth]{pictures/newPlugin2.png}\label{fig:newPlugin2}}}%
     \vspace{0.5cm}
-\centering
 \subfloat[Création d'un nouveau plugin - 3/4]{{\includegraphics[width=0.4\linewidth]{pictures/newPlugin3.png}\label{fig:newPlugin3}}}%
     \qquad
 \subfloat[Création d'un nouveau plugin - 4/4]{{\includegraphics[width=0.4\linewidth]{pictures/newPlugin4.png}\label{fig:newPlugin4}}}%
@@ -47,12 +45,59 @@ public class SampleHandler extends AbstractHandler {
 }
 \end{imtaCode}
 
-Nous exécutons le plugin \textit{via} le menu \textit{Run > Run Configurations...}, où nous choisisson \textit{Eclipse Application}, sélectionnons \textit{org.eclipse.platform.ide} %
-dans l'encadré \textit{Program to Run} sous l'option \textit{Run a product}.
+Nous exécutons le plugin \textit{via} le menu \textit{Run > Run Configurations...}, où nous choisissons \textit{Eclipse Application}, sélectionnons \textit{org.eclipse.platform.ide} %
+dans l'encadré \textit{Program to Run} sous l'option \textit{Run a product} (figure \ref{fig:runPlugin1}).
 Enfin, nous cliquons sur \textit{Run}.
 Une nouvelle instance d'Eclipse s'ouvre, avec un bouton supplémentaire correspondant à notre plugin.
-Lorsque nous cliquons sur celui-ci, une fenêtre s'ouvre, affichant le message \textit{"Hello, Eclipse world"}.
+Lorsque nous cliquons sur celui-ci, une fenêtre s'ouvre, affichant le message \textit{"Hello, Eclipse world"} (figure \ref{fig:runPlugin2}).
+
+\begin{figure}[H]
+    \centering
+
+    \includegraphics{pictures/runPlugin1.png}
+
+    \caption{Exécution du plugin dans une nouvelle instance d'Eclipse - 1/2}
+    \label{fig:runPlugin1}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+
+    \includegraphics{pictures/runPlugin3.png}
+
+    \caption{Exécution du plugin dans une nouvelle instance d'Eclipse - 2/2}
+    \label{fig:runPlugin2}
+\end{figure}
+
 
 \subsection{Intégration dans Rodin}
+
+Nous nous intéressons maintenant à l'intégration du plugin dans Rodin.
+Nous téléchargeons tout d'abord Rodin\footnote{%
+L'adresse du téléchargement est disponible sur le wiki Rodin : \href{http://wiki.event-b.org/index.php/Main\_Page}{http://wiki.event-b.org/index.php/Main\_Page}}.
+Une fois Rodin installé, nous retournons dans notre éditeur Eclipse pour RCP, et choisissons Rodin comme plateforme d'exécution.
+Dans le menu \textit{Run > Run Configurations...}, nous choisissons cette fois-ci \textit{org.rodinp.platform.product} comme produit à exécuter, %
+puis cliquons sur \textit{Run} (figure \ref{fig:runPlugin3}).
+Une instance de Rodin se lance alors, où nous pouvons créer une machine et interagir avec divers composants du monde Event-B, mais aussi %
+invoquer notre plugin (figure \ref{fig:runPlugin4}.
+
+\begin{figure}[H]
+    \centering
+
+    \includegraphics{pictures/runPlugin4.png}
+
+    \caption{Exécution du plugin dans Rodin - 1/2}
+    \label{fig:runPlugin3}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+
+    \includegraphics{pictures/runPlugin5.png}
+
+    \caption{Exécution du plugin dans Rodin - 2/2}
+    \label{fig:runPlugin4}
+\end{figure}
+
 
 \subsection{Appels à l'API de Rodin}
