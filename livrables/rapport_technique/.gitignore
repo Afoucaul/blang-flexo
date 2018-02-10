@@ -1,0 +1,9 @@
+*
+
+!.gitignore
+
+!*.tex
+!pictures/
+!pictures/*
+!sections/
+!sections/*.tex
