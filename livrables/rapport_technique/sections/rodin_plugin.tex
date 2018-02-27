@@ -79,7 +79,7 @@ Une fois Rodin installé, nous retournons dans notre éditeur Eclipse pour RCP, 
 Dans le menu \textit{Run > Run Configurations...}, nous choisissons cette fois-ci \textit{org.rodinp.platform.product} comme produit à exécuter, %
 puis cliquons sur \textit{Run} (figure \ref{fig:runPlugin3}).
 Une instance de Rodin se lance alors, où nous pouvons créer une machine et interagir avec divers composants du monde Event-B, mais aussi %
-invoquer notre plugin (figure \ref{fig:runPlugin4}.
+invoquer notre plugin (figure \ref{fig:runPlugin4}).
 
 \begin{figure}[H]
     \centering
@@ -101,3 +101,111 @@ invoquer notre plugin (figure \ref{fig:runPlugin4}.
 
 
 \subsection{Appels à l'API de Rodin}
+
+Nous souhaitons maintenant que notre plugin interagisse avec l'API de Rodin.
+Nous ajoutons d'abord les packages nécessaires au manifeste, à savoir \imtaInlinecode{java}{org.eventb.core} et \imtaInlinecode{java}{org.rodinp.core}.
+Nous ajoutons également \imtaInlinecode{java}{org.eclipse.core.runtime}, qui contient la classe \imtaInlinecode{java}{CoreException} dont hérite %
+\imtaInlinecode{java}{RodinDBException}, levée par la plupart des méthodes utilisées, et qui doit être déclarée pour être attrapée.
+Nous ouvrons donc le manifeste comme auparavant, cliquons sur l'onglet \textit{Dependencies}, et cliquons sur le bouton \textit{Add...}.
+Nous obtenons une vue semblable à la figure \ref{fig:addDependencies1}, et après validation, l'encadré de dépendances comporte les packages indiqués en figure %
+\ref{fig:addDependencies2}.
+
+\begin{figure}[H]
+    \centering
+
+    \includegraphics{pictures/addDependencies1.png}
+
+    \caption{Ajout des dépendances au manifeste}
+    \label{fig:addDependencies1}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+
+    \fcolorbox{gray!50}{white}{\includegraphics[width=0.6\linewidth]{pictures/addDependencies2.png}}
+
+    \caption{Encadré des dépendances après import}
+    \label{fig:addDependencies2}
+\end{figure}
+
+Nous créons dans la classe \imtaInlinecode{java}{SampleHandler} une méthode \imtaInlinecode{java}{listProjectElements}, listant les éléments d'un projet dont le nom %
+est passé en paramètre.
+
+\begin{imtaCode}{java}
+public void listProjectElements(String projectName)
+{
+    IRodinProject project = RodinCore.getRodinDB().getRodinProject(projectName);
+        try
+        {
+            for (IRodinElement element : project.getChildren())
+            {
+                if (element instanceof IRodinFile)
+                {
+                    IInternalElement root = ((IRodinFile) element).getRoot();
+                    if (root instanceof IMachineRoot)
+                    {
+                        for (IInvariant invariant : 
+                             ((IMachineRoot) root).getInvariants())
+                        {
+                            if (invariant.isTheorem())
+                            {
+                                System.out.println(
+                                    "Théorème : " + invariant.getLabel() + " : "
+                                    + invariant.getPredicateString());
+                            }
+                            else
+                            {
+                                System.out.println(
+                                    "Invariant : " + invariant.getLabel() + " : "
+                                    + invariant.getPredicateString());
+                            }
+                        }
+                        for (IEvent event : ((IMachineRoot) root).getEvents())
+                        {
+                            System.out.println("Événement : " + event.getLabel());
+                            for (IGuard garde : event.getGuards())
+                            {
+                                System.out.println(
+                                    "Garde : " + garde.getLabel() + " : " 
+                                    + garde.getPredicateString());
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (RodinDBException e) {
+        e.printStackTrace();
+    }
+}
+\end{imtaCode}
+
+Nous ajoutons un appel à cette méthode dans la méthode principale \imtaInlinecode{java}{SampleHandler.execute}, sur un projet Rodin nommé \imtaInlinecode{java}{"TestProject"}, %
+que nous créons et remplissons d'éléments de test, comme en figure \ref{fig:rodinTestProject}.
+Enfin, dans la console de l'instance de développement d'Eclipse, nous lisons les éléments listés comme montré en figure \ref{fig:rodinPluginConsole}.
+
+\begin{figure}[H]
+    \centering
+
+    \begin{minipage}{.4\linewidth}
+        \fbox{\includegraphics{pictures/rodinTestProject.png}}
+        \caption{Machine de test dans Rodin}
+        \label{fig:rodinTestProject}
+    \end{minipage}%
+    \qquad\qquad%
+    \begin{minipage}{.4\linewidth}
+        \includegraphics{pictures/rodinPluginConsole.png}
+        \caption{Sortie dans la console d'Eclipse}
+        \label{fig:rodinPluginConsole}
+    \end{minipage}
+\end{figure}
+
+Nous pouvons pousser le développement du plugin de test, afin d'afficher les informations précédentes directement dans Rodin, c'est-à-dire dans l'environnement cible.
+En reprenant la fenêtre de démonstration du plugin \textit{Hello, World}, nous obtenons la vue présentée en figure \ref{fig:rodinPluginWindow}.
+
+
+\begin{figure}[H]
+    \centering
+    \includegraphics{pictures/rodinPluginWindow.png}
+    \caption{Vue de Rodin avec la fenêtre d'informations du plugin}
+    \label{fig:rodinPluginWindow}
+\end{figure}
