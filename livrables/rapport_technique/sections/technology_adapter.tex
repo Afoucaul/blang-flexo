@@ -1,0 +1,27 @@
+\section{Développement d'un Technology Adapter Rodin}
+
+\subsection{Étude de la documentation de l'API Rodin}
+
+\subsection{Architecture du Technology Adapter}
+
+\subsection{Réalisation du Technology Adapter}
+
+\subsubsection{Création d'un projet Rodin}
+
+Dépendances : org.eclipse.core.resources
+
+Le wiki Rodin fournit une solution permettant de créer dynamiquement et programmatiquement des projets, \textit{via} l'API.
+Nous réutilisons ce code, et l'intégrons au plugin de test sous la forme d'une méthode \imtaInlinecode{java}{createRodinProject}.
+
+
+
+Dépendances
+
+\begin{itemize}
+    \item org.eclipse.core.resources
+    \item org.eclipse.core.runtime
+    \item org.eclipse.equinox.common
+    \item org.eclipse.equinox.registry
+    \item org.eventb.core
+    \item org.rodinp.core
+\end{itemize}
