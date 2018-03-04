@@ -1,1 +1,49 @@
+% PACKAGES
+
+\usepackage[francais]{babel} % Sehr wichtig: import this one first
+\usepackage{imta_core}
+\usepackage{imta_extra}
+\usepackage{adjustbox}
+\usepackage[backend=biber, sorting=none]{biblatex}
+\usepackage{subfig}
+\usepackage{scrextend}
+\usepackage{pmboxdraw}
+\usepackage{csquotes}
+\usepackage{colortbl}
+
+
+% BIBLIOGRAPHY
+
+\addbibresource{../common/bibliography.bib}
+
+
+% METAINFO
+
+\author{Armand Foucault}
+\date{Novembre 2017}
+\title{Métamodélisation du langage B et \mbox{interactions} avec un prouveur B}
+\subtitle{Plan de travail, rapport bibliographique}
+
+
+% COMMANDS
+
 \newcommand{\javacode}[1]{\imtaInlinecode{java}{#1}}
+\newcommand{\rawHref}[1]{\hspace{0.2em}\textcolor{imtaLightBlue}{\href{#1}{#1}}\hspace{0.2em}}
+
+
+% COLUMN TYPES
+
+\newcolumntype{L}[1]{>{\raggedright\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+\newcolumntype{C}[1]{>{\centering\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+\newcolumntype{R}[1]{>{\raggedleft\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+
+
+% COLORS
+
+\colorlet{Header}{imtaGreen}
+\definecolor{Task}{RGB}{209, 231, 151}
+\definecolor{Subtask}{RGB}{236, 245, 214}
+
+% \colorlet{Header}{imtaLightBlue}
+% \definecolor{Task}{RGB}{179, 242, 255}
+% \definecolor{Subtask}{RGB}{230, 251, 255}
