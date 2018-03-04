@@ -54,7 +54,7 @@ L'interface \javacode{IEvent} présente finalement les accesseurs suivants~:
 
 Nous notons que les variables locales se retrouvent sous le nom de \javacode{Parameter}.
 
-\subsubsection{Généralisation}
+\subsubsection{Généralisation avec \texttt{IInternalElement}}
 
 Les protocoles d'élément Event-B dérivent de la super-interface \javacode{IInternalElement}.
 Cette interface permet entre autres de manipuler plus génériquement les sous-éléments des éléments Event-B.
@@ -69,23 +69,50 @@ sachant que les interfaces d'élément Event-B définissent chacune leur type à
 \subsection{Implémentation}
 
 % XXX
+L'implémentation des éléments Event-B et des interfaces du packages \javacode{org.eventb.core} est réalisée par les classes contenues dans %
+le package \javacode{org.eventb.core.basis}.
+Ainsi, chaque protocole défini dans le package \javacode{org.eventb.core} trouve sa réalisation, comme \javacode{IAction} implémentée par %
+\javacode{Action}, ou encore \javacode{IGuard} implémentée par \javacode{Guard}.
+
+Les implémentations de ces interfaces ne sont toutefois pas destinées à être utilisées telles quelles.
+La documentation suggère en effet aux clients de l'API de ne manipuler que des instances des interfaces, ou bien à étendre les implémentations.
+En reprenant l'exemple de l'élément \javacode{Event}, cela revient à ne travailler qu'avec des \javacode{IEvent}, ou alors à créer une classe fille de \javacode{Event}
 
 
 \section{Éléments de projet Rodin}
 
 L'API de Rodin fournit une surcouche aux éléments Event-B pour les manipuler en tant qu'éléments d'un projet Rodin, c'est-à-dire d'un projet Eclipse.
-Les interfaces ainsi définies sont contenues dans le package \javacode{org.rodinp.core}.
+Les interfaces et classes auxquelles nous nous intéresseons sont ainsi définies dans le package \javacode{org.rodinp.core}.
+
+\subsection{Protocole}
+
+Le package \javacode{org.rodinp.core} définit tout d'abord le protocole des élément de projet Rodin, à travers l'interface \javacode{IRodinElement}.
+
+
+\subsection{Implémentation}
+
+L'implémentation des éléments de projet Rodin et de l'interface \javacode{IRodinElement} est réalisée par la classe \javacode{RodinElement}.
 
 
 \section{Résumé : l'exemple de la classe \texttt{Event}}
 
 Nous présentons sur la figure suivante l'arbre d'héritage de la classe \javacode{Event}, annoté des interfaces implémentées par chacune des classes.
 
+\begin{figure}[H]
+\centering
 \begin{imtaConsole}
 java.lang.Object
+│
 └── org.eclipse.core.runtime.PlatformObject
+    │
     └── org.rodinp.core.basis.RodinElement              -> IRodinElement
-        └── org.rodinp.core.basis.InternalElement       -> IInternalElement
+        │
+        └── org.rodinp.core.basis.InternalElement       -> IInternalElement, IParent,
+            │                                              IElementManipulation
             └── org.eventb.core.basis.EventBElement
+                │
                 └── org.eventb.core.basis.Event         -> IEvent
 \end{imtaConsole}
+\caption{Arbre d'héritage annoté de la classe \texttt{Event}}
+\label{fig:inheritanceTreeEvent}
+\end{figure}
