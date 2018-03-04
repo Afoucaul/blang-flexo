@@ -6,5 +6,5 @@
 !*.tex
 !pictures/
 !pictures/*
-!sections/
-!sections/*.tex
+!chapters/
+!chapters/*.tex
