@@ -109,12 +109,16 @@ Par ailleurs, l'interface \javacode{IRodinElement} fournit également des métho
 L'implémentation des éléments de projet Rodin et de l'interface \javacode{IRodinElement} est réalisée par la classe \javacode{RodinElement}.
 
 En plus des principales méthodes que nous avons évoquées en section \ref{sec:rodinProjectElementProtocol}, la classe \javacode{RodinElement} fournit %
-
+des accesseurs supplémentaires, dont \javacode{getChildren} et \javacode{getChildrenOfType}, renvoyant chacun une séquence d'éléments fils de l'élément courant.
 
 
 \section{Résumé : l'exemple de la classe \texttt{Event}}
 
-Nous présentons sur la figure suivante l'arbre d'héritage de la classe \javacode{Event}, annoté des interfaces implémentées par chacune des classes.
+Nous résumons dans cette section les fonctionnalités d'une classe implémentant un élément Event-B.
+Pour rester dans la même continuité, nous nous intéressons à l'implémentation d'un évènement, à travers la classe \javacode{Event}.
+Nous présentons donc les méthodes qu'elle met à notre disposition, ainsi que les classes et interfaces dont elle les tient.
+
+La figure suivante présente l'arbre d'héritage de la classe \javacode{Event}, annoté des interfaces implémentées par chacune des classes.
 
 \begin{figure}[H]
 \centering
@@ -134,3 +138,18 @@ java.lang.Object
 \caption{Arbre d'héritage annoté de la classe \texttt{Event}}
 \label{fig:inheritanceTreeEvent}
 \end{figure}
+
+Soit une instance de la classe \javacode{Event}, que nous nommons \javacode{event}.
+
+À travers l'interface \javacode{IEvent}, nous pouvons utiliser les méthodes \javacode{event.getActions}, \javacode{event.getGuards}, \javacode{event.getParameters}, %
+\javacode{event.getRefinesClauses}, et \javacode{event.getWitnesses}, ainsi que leurs pendants nommés, pour accéder respectivement aux actions, aux gardes, aux variables locales, %
+aux clauses de raffinement, et aux témoins de l'évènement \javacode{event}.
+
+Les méthodes héritées de \javacode{EventBElement} permettent de manipuler \javacode{event} comme un élément de projet Event-B.
+Nous pouvons ainsi décider qu'\javacode{event} est un théorème avec \javacode{event.setTheorem}, obtenir le commentaire qui lui est associé avec \javacode{event.getComment}, %
+et obtenir son nom et son expression \textit{via} les méthodes \javacode{event.getIdentifierString} et \javacode{event.getExpressionString}.
+
+L'interface \javacode{IInternalElement} rapproche \javacode{event} de Rodin, en lui ajoutant des méthodes agissant sur la base de données Rodin.
+Ainsi, nous pouvons forcer la création d'\javacode{event} dans cette dernière avec \javacode{event.create}, et lui attribuer un fils avec \javacode{event.createChild}.
+Nous pouvons également comparer \javacode{event} à un autre élément, avec \javacode{event.hasSameAttributes}, ou encore \javacode{event.hasSameChildren}.
+Nous pouvons par ailleurs interagir avec l'environnement de travail, et notamment récupérer le fichier courant avec \javacode{event.getRodinFile}.
