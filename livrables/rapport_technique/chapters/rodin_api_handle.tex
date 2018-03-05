@@ -1,4 +1,4 @@
-\chapter{Conception d'une surcouche Rodin}
+\chapter{Abstraction de l'API Rodin}
 
 Nous souhaitons abstraire les fonctionnalités de gestion de projet de l'API Rodin, afin de fournir une surcouche simple d'utilisation.
 Faisant écho aux scénarios de validation, nous présentons d'abord les fonctions abstraites que nous voulons pouvoir appeler sur cette surcouche.
@@ -39,3 +39,57 @@ Cette classe présentera l'interface suivante :
         \end{itemize}
 
 \end{labeling}
+
+
+\section{Défis de conception}
+
+La conception d'une surcouche à Rodin n'est pas une entreprise si simple qu'il n'y paraît.
+D'une part, l'abstraction des fonctionnalités nécessite une compréhension profonde de l'API, et une certaine rigueur vis-à-vis de la validation %
+des opérations effectuées.
+Par ailleurs, Rodin étant fondé sur Eclipse, il s'avère particulièrement difficile d'extraire son cœur.
+
+
+\subsection{Validation des opérations réalisées}
+
+
+\subsection{Extraction du cœur de Rodin}
+
+Au sein de l'API de Rodin, l'implémentation de la méthode Event-B, est contenue dans les packages préfixés par \javacode{org.eventb.}.
+La couche de gestion de projet et l'interface utilisateur, quant à elles, sont contenues dans les packages \javacode{org.rodinp.}.
+Nous appelons la première région le cœur de Rodin, et la seconde, la couche externe.
+
+La séparation entre ces deux régions est très floue.
+Notamment, comme nous l'avons vu en section \ref{sec:rodinApiSummaryEvent}, les classes implémentant les éléments Event-B sont définies dans le cœur de Rodin, %
+héritent de \javacode{EventBElement} qui appartient au cœur, mais étendent également \javacode{InternalElement} qui se situe dans la couche externe de l'API.
+L'enjeu de cette abstraction est donc avant tout d'isoler les opérations de manipulation de projets et d'éléments.
+
+Toutefois, la manipulation d'un projet Rodin implique une communication avec la base de données Rodin.
+Or, celle-ci ne peut être acquise qu'à travers un \textit{workspace}, typiquement de la manière suivante~:
+
+\begin{figure}[H]
+\centering
+\begin{imtaCode}{java}
+final IWorkspace workspace = ResourcesPlugin.getWorkspace();
+final IRodinDB rodinDB = RodinCore.valueOf(workspace.getRoot());
+\end{imtaCode}
+\caption{Acquisition de la base de données Rodin}
+\label{fig:rodinDbAccess}
+\end{figure}
+
+Nous comprenons qu'un \textit{workspace} doit exister, et que le plugin \javacode{ResourcesPlugin} doit avoir été initialisé.
+L'obstacle qui se dessine est précisément la nécessité de l'existence d'une instance d'\javacode{IWorkspace}~: en effet, comme l'indique la documentation %
+de l'API d'Eclipse \cite{eclipseiworkspace}, cette interface n'a pas vocation à être étendue ni implémentée par les clients.
+Concrètement, cela signifie qu'un \textit{workspace} n'est \textit{a priori} pas censé exister hors d'une instance d'Eclipse.
+Ainsi, faire fonctionner le cœur de Rodin hors du mode plugin semble entravé par cette contrainte..
+
+La solution idéale consiste à déterminer et à implémenter une méthode d'instanciation dynamique d'un \textit{workspace} Eclipse.
+Cela permettrait de produire une bibliothèque de classes fermée et sans dépendances autres qu'à l'API de Rodin et à celle d'Eclipse.
+Une telle bibliothèque serait relativement simple à intégrer à OpenFlexo.
+Cette solution offrirait par effet de bord une preuve de concept de l'intégration d'une application RCP Eclipse à OpenFlexo.
+
+Une alternative, nettement moins désirable, consisterait à lancer effectivement une instance de Rodin dans laquelle s'exécuterait un plugin, qui communiquerait %
+en réseau, par exemple sur une socket Unix, avec l'instance d'OpenFlexo.
+Cette solution, bien qu'elle ait le mérite de contourner l'obstacle, est très peu satisfaisante, car elle n'intègre pas à proprement parler Rodin dans l'écosystème OpenFlexo.
+Par ailleurs, elle implique l'exécution d'une instance d'Eclipse en plus d'OpenFlexo, et entraîne une consommation peu utile de ressources supplémentaires.
+
+% Tout l'enjeu de cette abstraction est donc de construire une bibliothèque de classes, capables de
