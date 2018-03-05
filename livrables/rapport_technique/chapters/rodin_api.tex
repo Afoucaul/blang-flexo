@@ -68,7 +68,6 @@ sachant que les interfaces d'élément Event-B définissent chacune leur type à
 
 \subsection{Implémentation}
 
-% XXX
 L'implémentation des éléments Event-B et des interfaces du packages \javacode{org.eventb.core} est réalisée par les classes contenues dans %
 le package \javacode{org.eventb.core.basis}.
 Ainsi, chaque protocole défini dans le package \javacode{org.eventb.core} trouve sa réalisation, comme \javacode{IAction} implémentée par %
@@ -81,17 +80,36 @@ En reprenant l'exemple de l'élément \javacode{Event}, cela revient à ne trava
 
 \section{Éléments de projet Rodin}
 
-L'API de Rodin fournit une surcouche aux éléments Event-B pour les manipuler en tant qu'éléments d'un projet Rodin, c'est-à-dire d'un projet Eclipse.
+L'API de Rodin fournit une surcouche aux éléments Event-B pour les manipuler en tant qu'éléments d'un projet Rodin, c'est-à-dire d'un type de projet Eclipse.
 Les interfaces et classes auxquelles nous nous intéresseons sont ainsi définies dans le package \javacode{org.rodinp.core}.
+
+\subsection{La base de données Rodin}
+
+Nous nous proposons tout d'abord de présenter le cœur de Rodin : la base de données Rodin.
+Implémentée par la classe \javacode{RodinDB}, celle-ci est chargée de conserver en mémoire les éléments de projets créés.
+Toute manipulation d'élément de projet Rodin entraîne une écriture dans la base de données.
+Par ailleurs, cette classe implémente un singleton, en lançant une exception de type \javacode{java.lang.Error} si son constructeur est appelée deux fois.
+
+La classe \javacode{RodinDB} propose différentes méthodes de manipulation de projet, notamment \javacode{getWorkspace} et \javacode{getRodinProject}.
+Elle est par ailleurs gérée par la classe \javacode{RodinDBManager}, qui la rend disponible à travers sa méthode \javacode{getRodinDB}.
+
 
 \subsection{Protocole}
 
 Le package \javacode{org.rodinp.core} définit tout d'abord le protocole des élément de projet Rodin, à travers l'interface \javacode{IRodinElement}.
+Cette interface permet notamment d'interagir avec la base de données Rodin, avec la méthode \javacode{exists}, vérifiant si l'élément existe dans la base.
+Elle permet également d'observer la hiérarchie d'éléments, à travers les méthodes \javacode{getAncestor} et \javacode{getParent}.
+
+Par ailleurs, l'interface \javacode{IRodinElement} fournit également des méthodes de manipulation générique des éléments, telles que \javacode{getElementName} et %
+\javacode{getElementType}.
 
 
-\subsection{Implémentation}
+\subsection{Implémentation}\label{sec:rodinProjectElementProtocol}
 
 L'implémentation des éléments de projet Rodin et de l'interface \javacode{IRodinElement} est réalisée par la classe \javacode{RodinElement}.
+
+En plus des principales méthodes que nous avons évoquées en section \ref{sec:rodinProjectElementProtocol}, la classe \javacode{RodinElement} fournit %
+
 
 
 \section{Résumé : l'exemple de la classe \texttt{Event}}
