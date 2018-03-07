@@ -1,4 +1,4 @@
-\chapter{Abstraction de l'API Rodin}
+\chapter{Abstraction de l'API Rodin}\label{sec:apihandle}
 
 Nous souhaitons abstraire les fonctionnalités de gestion de projet de l'API Rodin, afin de fournir une surcouche simple d'utilisation.
 Faisant écho aux scénarios de validation, nous présentons d'abord les fonctions abstraites que nous voulons pouvoir appeler sur cette surcouche.
@@ -77,15 +77,10 @@ L'enjeu de cette abstraction est donc avant tout d'isoler les opérations de man
 Toutefois, la manipulation d'un projet Rodin implique une communication avec la base de données Rodin.
 Or, celle-ci ne peut être acquise qu'à travers un \textit{workspace}, typiquement de la manière suivante~:
 
-\begin{figure}[H]
-\centering
 \begin{imtaCode}{java}
 final IWorkspace workspace = ResourcesPlugin.getWorkspace();
 final IRodinDB rodinDB = RodinCore.valueOf(workspace.getRoot());
 \end{imtaCode}
-\caption{Acquisition de la base de données Rodin}
-\label{fig:rodinDbAccess}
-\end{figure}
 
 Nous comprenons qu'un \textit{workspace} doit exister, et que le plugin \javacode{ResourcesPlugin} doit avoir été initialisé.
 L'obstacle qui se dessine est précisément la nécessité de l'existence d'une instance d'\javacode{IWorkspace}~: en effet, comme l'indique la documentation %
@@ -104,10 +99,10 @@ Cette solution, bien qu'elle ait le mérite de contourner l'obstacle, est très 
 Par ailleurs, elle implique l'exécution d'une instance d'Eclipse en plus d'OpenFlexo, et entraîne une consommation peu utile de ressources supplémentaires.
 
 
-\section{Développement de la surcouche}
+\section{Développement d'une bibliothèque indépendante d'Eclipse}
 
-% TODO
-% On veut implémenter la solution 1
+Nous souhaitons implémenter la surcouche de Rodin en tant que bibliothèque de classes qui ne dépend pas d'une instance d'Eclipse en cours d'exécution.
+Comme Rodin est malgré tout conçu en tant que plugin d'Eclipse, il nécessite une partie du cœur d'Eclipse, que nous devons initialiser nous-mêmes.
 
 \subsection{Ouverture du \textit{workspace}}
 
@@ -200,7 +195,7 @@ public java.lang.String getOS();
 
 Comme l'indique la documentation d'Oracle, l'instruction \texttt{aload} \cite{javaaload} pousse une variable sur la pile de la JVM, et l'instruction %
 \texttt{ldc} \cite{javaldc} y pousse une valeur scalaire.
-Le code source de cette méthode ressemble donc probablement à celui qui suit~:
+Le code source de cette méthode est donc équivalent à celui qui suit~:
 
 \begin{imtaCode}{java}
 public String getOS() {
@@ -210,3 +205,94 @@ public String getOS() {
 
 Nous cherchons la source d'une \javacode{NullPointerException}.
 Or, nous savons que \javacode{this} ne pointe pas sur \javacode{null}.
+Nous testons donc l'appel \javacode{InternalPlatform.getDefault().getBundleContext()}, correspondant à l'invocation de la méthode d'instance %
+\javacode{InternalPlatform.getBundleContext}, et nous remarquons que la valeur retournée est \javacode{null}.
+L'erreur \javacode{NullPointerException} est donc levée par l'invocation de la méthode \javacode{BundleContext.getProperty} sur une référence nulle.
+
+En inspectant le code source de la classe \javacode{InternalPlatform}, nous découvrons que la méthode d'instance \javacode{getBundleContext} renvoie l'attribut \javacode{context}, %
+qui est initialisé par la méthode \javacode{start}.
+Comme cette dernière reçoit un \javacode{BundleContext} en argument, nous initialisons l'instance d'\javacode{InternalPlatform} de la façon suivante~:
+
+\begin{imtaCode}{java}
+// Initialisation du framework
+FrameworkFactory frameworkFactory = ServiceLoader.load(FrameworkFactory.class).iterator().next();
+Map<String, String> config = new HashMap<String, String>();
+Framework framework = frameworkFactory.newFramework(config);
+framework.start();
+
+// Démarrage de la plateforme
+BundleContext runtimeContext = framework.getBundleContext();
+InternalPlatform.getDefault().start(runtimeContext);
+
+// Instanciation du workspace
+Workspace workspace = new Workspace();
+\end{imtaCode}
+
+L'exécution de ce code ne produit plus la même exception, comme le montre la trace~:
+
+\begin{imtaConsole}
+Exception in thread "main" java.lang.NullPointerException
+	at org.eclipse.core.internal.resources.LocalMetaArea.<init>(LocalMetaArea.java:59)
+	at org.eclipse.core.internal.resources.Workspace.<init>(Workspace.java:286)
+	at test.Main.main(Main.java:207)
+\end{imtaConsole}
+
+Bien que l'instanciation du \textit{workspace} ne fonctionne toujours pas, l'initialisation de la plateforme ne lève plus d'erreur.
+Nous continuons donc notre rétro-ingénierie sur la classe \javacode{LocalMetaArea}, dont l'instanciation semble être à la source de l'erreur.
+
+
+\subsubsection{Analyse de la classe \texttt{LocalMetaArea}}
+
+Nous trouvons les sources de la classe \javacode{LocalMetaArea} sur GrepCode \footnote{%
+\url{http://grepcode.com/file/repository.grepcode.com/java/eclipse.org/4.4.1/org.eclipse.core/resources/3.9.1/org/eclipse/core/internal/resources/LocalMetaArea.java}}.
+En nous intéressant à son constructeur, nous lisons le code suivant~:
+
+\begin{imtaCode}{java}
+public LocalMetaArea() {
+    super();
+    metaAreaLocation = ResourcesPlugin.getPlugin().getStateLocation();
+    projectMetaLocation = metaAreaLocation.append(F_PROJECTS);
+}
+\end{imtaCode}
+
+En testant indépendamment l'acquisition du plugin de gestion des ressources Eclipse, nous constatons qu'il n'est pas initialisé~:
+
+\begin{imtaCode}{java}
+System.out.println(ResourcesPlugin.getPlugin());
+\end{imtaCode}
+\vspace{-0.5cm}
+\begin{imtaConsole}
+null
+\end{imtaConsole}
+
+Après de nombreux essais infructueux, il apparaît très lourd d'initialiser ce plugin sans passer par l'initialisation traditionnelle d'Eclipse.
+
+
+\subsection{Difficulté de la rétro-ingénierie~: vers une alternative}
+
+En creusant de plus en plus profondément le code source et le \textit{bytecode} de l'API d'Eclipse, nous ressentons la lourdeur que représente l'instanciation d'un \textit{workspace}.
+Cela est dû au fait que la classe \javacode{Workspace} est instanciée par Eclipse à l'initialisation.
+Ainsi, pour ouvrir manuellement un \textit{workspace}, il faut reproduire au moins partiellement les étapes d'initialisation d'Eclipse, ce qui est fatalement très lourd.
+Pour appuyer ce fait, la documentation de la classe \javacode{ResourcesPlugin} \cite{eclipseresourcesplugin} nous indique que le \textit{workspace} est censé être initialisé à travers la méthode %
+\javacode{ResourcesPlugin.getWorkspace}~:
+
+\begin{quote}
+A typical sequence of events would be for a dependent plug-in to call ResourcesPlugin.getWorkspace().
+Doing so would cause this plug-in to be activated and the workspace (if any) to be loaded from disk and initialized.
+\end{quote}
+
+Or, un appel à la méthode \javacode{getWorkspace} résulte en une erreur, tout comme un appel à la méthode \javacode{start}.
+Nous comprenons qu'il sera très complexe de mettre en œuvre une partie de l'API Eclipse sans lancer toute la machinerie.
+
+Afin de réaliser une preuve de concept de l'intégration de Rodin à OpenFlexo nous nous proposons d'implémenter une méthode alternative.
+Celle-ci ne sera pas idéale, puisqu'elle ne permettra pas d'isoler le cœur de Rodin et de l'intégrer à OpenFlexo en tant que Technology Adapter~; %
+Elle aura néanmoins le mérite de démontrer la faisabilité d'une telle intégration.
+
+
+\section{Conception d'une surcouche en mode \textit{plugin}}
+
+La solution que nous nous proposons de réaliser consiste à abstraire l'API de Rodin dans un fonctionnement en mode \textit{plugin}, et à faire communiquer une instance de Rodin %
+avec l'instance d'OpenFlexo
+Cette approche permet de s'affranchir des problèmes d'initialisation de \textit{workspace}, puisqu'Eclipse s'en charge alors à notre place.
+
+% TODO
