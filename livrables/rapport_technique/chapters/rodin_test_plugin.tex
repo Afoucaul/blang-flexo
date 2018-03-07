@@ -1,10 +1,23 @@
-\chapter{Écriture d'un plugin de test pour Rodin}
+\chapter{Écriture d'un plugin pour Rodin}
 
-Nous nous proposons dans un premier temps de procéder à l'implémentation d'un plugin élémentaire pour Rodin, dans le but de nous familiariser avec son API.
+Nous procédons dans un premier temps à l'implémentation d'un plugin élémentaire pour Rodin, dans le but de nous familiariser avec son API.
 Pour ce faire, nous reprenons le tutoriel d'Aymerick Savary \cite{asavary}.
 Ce tutoriel explique pas à pas le développement d'un plugin simple pour Eclipse, et vient y intégrer des appels à l'API de Rodin.
 
-\section{Écriture d'un plugin de base}
+Nous construisons ensuite l'abstraction présentée au chapitre \ref{sec:apihandle}, et l'intégrons dans un projet \textit{plugin} Eclipse, %
+qui disposera ainsi de fonctions simples d'utilisation pour manipuler les projets Rodin.
+Nous présenterons au chapitre suivant la communication entre ce plugin et OpenFlexo.
+
+Nous dirons que l'API de Rodin fonctionne en mode \textit{plugin}.
+Ce mode est très confortable, car il laisse à Eclipse la charge d'initialiser les environnements nécessaires à la manipulation de projets Rodin.
+
+
+\section{Implémentation d'un plugin élémentaire Rodin}
+
+Nous nous proposons de réaliser un plugin élémentaire pour Rodin.
+Nous commençons par écrire un plugin de base pour Eclipse, puis nous l'intégrons à Rodin, et enfin nous y ajoutons des appels à l'API de Rodin.
+
+\subsection{Écriture d'un plugin générique Eclipse}
 
 Nous commençons par télécharger le package d'Eclipse
 \footnote{À l'heure de la rédaction de ce document, la liste de packages disponibles se trouve sur le site d'Eclipse, %
@@ -71,7 +84,7 @@ Lorsque nous cliquons sur celui-ci, une fenêtre s'ouvre, affichant le message \
 \end{figure}
 
 
-\section{Intégration dans Rodin}
+\subsection{Intégration dans Rodin}
 
 Nous nous intéressons maintenant à l'intégration du plugin dans Rodin.
 Nous téléchargeons tout d'abord Rodin\footnote{%
@@ -101,7 +114,7 @@ invoquer notre plugin (figure \ref{fig:runPlugin4}).
 \end{figure}
 
 
-\section{Appels à l'API de Rodin}
+\subsection{Appels à l'API de Rodin}
 
 Nous souhaitons maintenant que notre plugin interagisse avec l'API de Rodin.
 Nous ajoutons d'abord les packages nécessaires au manifeste, à savoir \imtaInlinecode{java}{org.eventb.core} et \imtaInlinecode{java}{org.rodinp.core}.
@@ -203,10 +216,15 @@ Enfin, dans la console de l'instance de développement d'Eclipse, nous lisons le
 Nous pouvons pousser le développement du plugin de test, afin d'afficher les informations précédentes directement dans Rodin, c'est-à-dire dans l'environnement cible.
 En reprenant la fenêtre de démonstration du plugin \textit{Hello, World}, nous obtenons la vue présentée en figure \ref{fig:rodinPluginWindow}.
 
-
 \begin{figure}[H]
     \centering
     \includegraphics{pictures/rodinPluginWindow.png}
     \caption{Vue de Rodin avec la fenêtre d'informations du plugin}
     \label{fig:rodinPluginWindow}
 \end{figure}
+
+
+
+\section{Développement du plugin d'abstraction de Rodin}
+
+%TODO
