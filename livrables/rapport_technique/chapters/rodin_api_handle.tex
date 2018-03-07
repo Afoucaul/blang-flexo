@@ -31,11 +31,22 @@ Cette classe présentera l'interface suivante :
     \item [\javacode{public static}] \javacode{IRodinProject createRodinProject(final String name)}
         \begin{itemize}[label={}]
             \item Création d'un projet Rodin avec le nom donné.
+            \item \textit{Dépend de :}
+                \begin{itemize}
+                    \item \javacode{org.eclipse.core.resources.IWorkspace}
+                    \item \javacode{org.eclipse.core.resources.IProject}
+                    \item \javacode{org.rodinp.core.IRodinProject}
+                \end{itemize}
         \end{itemize}
 
     \item [\javacode{public static}] \javacode{IMachineRoot createEventbMachine(IRodinProject project, final String name)}
         \begin{itemize}[label={}]
             \item Création d'une machine Event-B dans le projet donné et avec le nom donné.
+            \item \textit{Dépend de :}
+                \begin{itemize}
+                    \item \javacode{org.rodinp.core.IRodinProject}
+                    \item \javacode{org.rodinp.core.IRodinFile}
+                \end{itemize}
         \end{itemize}
 
 \end{labeling}
@@ -80,7 +91,7 @@ Nous comprenons qu'un \textit{workspace} doit exister, et que le plugin \javacod
 L'obstacle qui se dessine est précisément la nécessité de l'existence d'une instance d'\javacode{IWorkspace}~: en effet, comme l'indique la documentation %
 de l'API d'Eclipse \cite{eclipseiworkspace}, cette interface n'a pas vocation à être étendue ni implémentée par les clients.
 Concrètement, cela signifie qu'un \textit{workspace} n'est \textit{a priori} pas censé exister hors d'une instance d'Eclipse.
-Ainsi, faire fonctionner le cœur de Rodin hors du mode plugin semble entravé par cette contrainte..
+Ainsi, faire fonctionner le cœur de Rodin hors du mode plugin semble entravé par cette contrainte.
 
 La solution idéale consiste à déterminer et à implémenter une méthode d'instanciation dynamique d'un \textit{workspace} Eclipse.
 Cela permettrait de produire une bibliothèque de classes fermée et sans dépendances autres qu'à l'API de Rodin et à celle d'Eclipse.
@@ -92,4 +103,44 @@ en réseau, par exemple sur une socket Unix, avec l'instance d'OpenFlexo.
 Cette solution, bien qu'elle ait le mérite de contourner l'obstacle, est très peu satisfaisante, car elle n'intègre pas à proprement parler Rodin dans l'écosystème OpenFlexo.
 Par ailleurs, elle implique l'exécution d'une instance d'Eclipse en plus d'OpenFlexo, et entraîne une consommation peu utile de ressources supplémentaires.
 
-% Tout l'enjeu de cette abstraction est donc de construire une bibliothèque de classes, capables de
+
+\section{Développement de la surcouche}
+
+% TODO
+% On veut implémenter la solution 1
+
+\subsection{Ouverture du \textit{workspace}}
+
+Afin de pouvoir manipuler des projets Rodin et leurs éléments, il est primordial de disposer d'un \textit{workspace} ouvert.
+Il faut donc trouver dans la base de code d'Eclipse quelle classe implémente l'interface \javacode{IWorkspace}, et déterminer une manière de l'instancier.
+
+Une recherche du mot-clé \textit{workspace} dans le moteur de recherche GrepCode\footnote{%
+\url{http://grepcode.com/search?query=workspace&start=0&entity=type&n=}} %
+permet de trouver la classe \javacode{org.eclipse.core.internal.resources.Workspace}, et d'accéder à son code source \cite{eclipseworkspace}.
+Notons au passage que le package \javacode{org.eclipse.core.internal.resources} ne figure pas sur la vue globale des packages de l'API Eclipse \cite{eclipseapioverview}.
+Nous essayons donc d'instancier la classe \javacode{Workspace}, avec le code minimal suivant~:
+
+\begin{imtaCode}{java}
+import org.eclipse.core.internal.resources.Workspace;    
+
+public class Main {
+    public static void main(String[] args) {
+        Workspace workspace = new Workspace();
+    }
+}
+\end{imtaCode}
+
+L'exécution de cette classe conduit malheureusement à une exception \javacode{ExceptionInInitializerError}, avec la trace suivante :
+
+\begin{imtaConsole}
+Exception in thread "main" java.lang.ExceptionInInitializerError
+	at Test.Main.main(Main.java:6)
+Caused by: java.lang.NullPointerException
+	at org.eclipse.core.internal.runtime.InternalPlatform.getOS(InternalPlatform.java:395)
+	at org.eclipse.core.runtime.Platform.getOS(Platform.java:1126)
+	at org.eclipse.core.internal.resources.Workspace.<clinit>(Workspace.java:84)
+	... 1 more
+\end{imtaConsole}
+
+Cette trace nous informe qu'un appel à la méthode statique \javacode{Platform.getOS} a été effectué, mais à échoué lors d'un appel à la méthode d'instance %
+\javacode{InternalPlatform.getOS}.
