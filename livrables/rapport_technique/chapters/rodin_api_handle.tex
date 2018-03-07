@@ -144,3 +144,55 @@ Caused by: java.lang.NullPointerException
 
 Cette trace nous informe qu'un appel à la méthode statique \javacode{Platform.getOS} a été effectué, mais à échoué lors d'un appel à la méthode d'instance %
 \javacode{InternalPlatform.getOS}.
+Ne disposant pas du code source de la classe \javacode{Platform.getOS}, nous pouvons malgré tout inspecter le bytecode associé.
+Nous trouvons ainsi la définition de la méthode \javacode{getOS}~:
+
+\begin{imtaCode}{java}
+// Method descriptor #264 ()Ljava/lang/String;
+// Stack: 1, Locals: 0
+public static java.lang.String getOS();
+  0  invokestatic org.eclipse.core.internal.runtime.InternalPlatform.getDefault() : org.eclipse.core.internal.runtime.InternalPlatform [398]
+  3  invokevirtual org.eclipse.core.internal.runtime.InternalPlatform.getOS() : java.lang.String [389]
+  6  areturn
+    Line numbers:
+      [pc: 0, line: 1126]
+\end{imtaCode}
+
+La documentation d'Oracle nous renseigne sur le sens des instructions \texttt{invokestatic} \cite{javainvokestatic} et \texttt{invokevirtual} \cite{javainvokevirtual}~: %
+la première correspond à l'appel d'une méthode statique, et la seconde à l'appel d'une méthode d'instance.
+Nous comprenons donc que la méthode \javacode{Platform.getOS} appelle en premier lieu la méthode statique \javacode{InternalPlatform.getDefault}, %
+puis appelle sur l'instance retournée la méthode \javacode{getOS}, et renvoie enfin l'instance de \javacode{String} retournée.
+Les appels étant naturellement chaînés façon Java, le code source ressemble probablement à ceci~:
+
+\begin{imtaCode}{java}
+public static String getOS() {
+    return InternalPlatform.getDefault().getOS();
+}
+\end{imtaCode}
+
+Si l'on s'intéresse maintenant à la méthode d'instance \javacode{InternalPlatform.getOS}, le bytecode est le suivant~:
+
+\begin{imtaCode}{java}
+// Method descriptor #572 ()Ljava/lang/String;
+// Stack: 2, Locals: 1
+public java.lang.String getOS();
+ 0  aload_0 [this]
+ 1  invokevirtual org.eclipse.core.internal.runtime.InternalPlatform.getBundleContext() : org.osgi.framework.BundleContext [897]
+ 4  ldc <String "osgi.os"> [18]
+ 6  invokeinterface org.osgi.framework.BundleContext.getProperty(java.lang.String) : java.lang.String [955] [nargs: 2]
+11  areturn
+  Line numbers:
+    [pc: 0, line: 395]
+  Local variable table:
+    [pc: 0, pc: 12] local: this index: 0 type: org.eclipse.core.internal.runtime.InternalPlatform
+\end{imtaCode}
+
+Comme l'indique la documentation d'Oracle, l'instruction \texttt{aload} \cite{javaaload} pousse une variable sur la pile de la JVM, et l'instruction %
+\texttt{ldc} \cite{javaldc} y pousse une valeur scalaire.
+Le code source de cette méthode ressemble donc probablement à celui qui suit~:
+
+\begin{imtaCode}{java}
+public String getOS() {
+    return this.getBundleContext().getProperty("osgi.os");
+}
+\end{imtaCode}
