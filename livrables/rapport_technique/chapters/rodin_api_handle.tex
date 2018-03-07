@@ -144,7 +144,12 @@ Caused by: java.lang.NullPointerException
 
 Cette trace nous informe qu'un appel à la méthode statique \javacode{Platform.getOS} a été effectué, mais à échoué lors d'un appel à la méthode d'instance %
 \javacode{InternalPlatform.getOS}.
-Ne disposant pas du code source de la classe \javacode{Platform.getOS}, nous pouvons malgré tout inspecter le bytecode associé.
+Nous souhaitons investiguer pour trouver la source de l'erreur \javacode{NullPointerException}.
+
+
+\subsubsection{Analyse du \textit{bytecode} de \texttt{Platform.getOS}}
+
+Ne disposant pas du code source de la classe \javacode{Platform}, nous pouvons malgré tout inspecter le bytecode associé.
 Nous trouvons ainsi la définition de la méthode \javacode{getOS}~:
 
 \begin{imtaCode}{java}
@@ -170,7 +175,13 @@ public static String getOS() {
 }
 \end{imtaCode}
 
-Si l'on s'intéresse maintenant à la méthode d'instance \javacode{InternalPlatform.getOS}, le bytecode est le suivant~:
+Si par ailleurs nous essayons d'invoquer la méthode \javacode{InternalPlatform.getDefault}, aucune erreur ne survient.
+L'erreur est donc levée à l'intérieur de l'appel à la méthode d'instance \javacode{InternalPlatform.getOS}, comme le laissait entendre la trace d'erreur.
+
+
+\subsubsection{Analyse du \textit{bytecode} de \texttt{InternalPlatform.getOS}}
+
+Nous nous intéressons maintenant à la méthode d'instance \javacode{InternalPlatform.getOS}, dont le bytecode est le suivant~:
 
 \begin{imtaCode}{java}
 // Method descriptor #572 ()Ljava/lang/String;
@@ -196,3 +207,6 @@ public String getOS() {
     return this.getBundleContext().getProperty("osgi.os");
 }
 \end{imtaCode}
+
+Nous cherchons la source d'une \javacode{NullPointerException}.
+Or, nous savons que \javacode{this} ne pointe pas sur \javacode{null}.
