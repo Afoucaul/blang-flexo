@@ -24,7 +24,6 @@ public class Pair<T, U> {
 			System.out.println("Could not cast other into Pair");
 			return false;
 		}
-		System.out.println(otherPair.first + ", " + first);
-		return (otherPair.first == first && otherPair.second == second);
+		return (otherPair.first.equals(first) && otherPair.second.equals(second));
 	}
 }

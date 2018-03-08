@@ -8,11 +8,15 @@ import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eventb.core.ICommentedElement;
+import org.eventb.core.IEvent;
+import org.eventb.core.basis.Event;
+import org.rodinp.core.IInternalElement;
 import org.rodinp.core.IRodinDB;
 import org.rodinp.core.IRodinFile;
 import org.rodinp.core.IRodinProject;
 import org.rodinp.core.RodinCore;
 import org.rodinp.core.basis.RodinElement;
+import org.rodinp.internal.core.RodinFile;
 import org.rodinp.internal.core.RodinProject;
 
 public class ApiAbstractor {
@@ -26,8 +30,9 @@ public class ApiAbstractor {
 		System.out.println(message);
 	}	
 	
-	private static void fail(String message, Exception error) {
+	private static ApiAbstractorException fail(String message, Exception error) {
 		System.out.println(message + "\n\tError: " + error);
+		return new ApiAbstractorException(error);
 	}
 	
 	public static void start() {
@@ -78,6 +83,11 @@ public class ApiAbstractor {
 		
 		Object result = null;
 		for (Pair itKey : environment.keySet()) {
+			/*
+			System.out.println("===");
+			System.out.println(itKey.second + ", " + key.second + ", " + ((Boolean)(itKey.second == key.second)).toString());
+			System.out.println(itKey.first == key.first);
+			*/
 			if (itKey.equals(key)) {
 				result = environment.get(itKey);
 				break;
@@ -85,7 +95,7 @@ public class ApiAbstractor {
 		}
 		
 		if (result == null)
-			say("Could not find " + type + " instance '" + name + "'");
+			say("Could not find '" + type + "' instance '" + name + "'");
 		
 		return result;
 	}
@@ -120,27 +130,46 @@ public class ApiAbstractor {
 			return rodinProject;
 			
 		} catch (final CoreException ex) {
-			fail("Could not create Rodin project", ex);
-			throw new ApiAbstractorException(ex);
+			throw fail("Could not create Rodin project", ex);
 		}
 	}
 	
-	public static IRodinFile createRodinConstruct(final String projectName, final String fileName) throws ApiAbstractorException {
+	public static IRodinFile createMachine(final String projectName, String machineName) throws ApiAbstractorException {
 		RodinProject project = (RodinProject) lookupEnvironment(RodinProject.class, projectName);
 		if (project == null)
-			return null;
+			throw new ApiAbstractorException("Project not found");
+		
+		machineName += ".bum";
 		
 		try {
-			final IRodinFile rodinFile = project.getRodinFile(fileName);
+			final IRodinFile rodinFile = project.getRodinFile(machineName);
 			rodinFile.create(true, null);
 			//rodinFile.getResource().setDerived(true);    // mark the file as derived
 			
-			insertIntoEnvironment(rodinFile, fileName);
+			insertIntoEnvironment(rodinFile, machineName);
 			return rodinFile;
 		} catch (final Exception ex) {
-			fail("Could not create Rodin construct", ex);
-			throw new ApiAbstractorException(ex);
+			throw fail("Could not create machine", ex);
 		}
 	}
-	
+
+	public static IEvent addEvent(String machineName, final String eventName) throws ApiAbstractorException {
+		machineName += ".bum";
+		
+		try {
+			RodinFile machine = (RodinFile) lookupEnvironment(RodinFile.class, machineName);
+			if (machine == null)
+				throw new ApiAbstractorException("Machine '" + machineName + "' not found");
+			
+			IInternalElement root = machine.getRoot();
+			Event event = new Event(eventName, root);
+			event.create(null, null);
+			
+			insertIntoEnvironment(event, eventName);
+			return event;
+		
+		} catch (final Exception ex) {
+			throw fail("Could not add event '" + eventName + "' to machine '" + machineName + "'", ex);
+		}
+	}	
 }

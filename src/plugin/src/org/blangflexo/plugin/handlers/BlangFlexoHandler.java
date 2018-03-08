@@ -23,7 +23,8 @@ public class BlangFlexoHandler extends AbstractHandler {
 		IWorkbenchWindow window = HandlerUtil.getActiveWorkbenchWindowChecked(event);
 		try {
 			ApiAbstractor.createRodinProject("hello");
-			ApiAbstractor.createRodinConstruct("hello", "machine1.bum");
+			ApiAbstractor.createMachine("hello", "machine1");
+			ApiAbstractor.addEvent("machine1", "initialisation");
 		} catch (ApiAbstractorException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
