@@ -93,7 +93,7 @@ Cela permettrait de produire une bibliothèque de classes fermée et sans dépen
 Une telle bibliothèque serait relativement simple à intégrer à OpenFlexo.
 Cette solution offrirait par effet de bord une preuve de concept de l'intégration d'une application RCP Eclipse à OpenFlexo.
 
-Une alternative, consisterait à lancer effectivement une instance de Rodin dans laquelle s'exécuterait un plugin, qui communiquerait %
+Une alternative consisterait à lancer effectivement une instance de Rodin dans laquelle s'exécuterait un plugin, qui communiquerait %
 en réseau, par exemple sur une socket Unix, avec l'instance d'OpenFlexo.
 Cette solution est moins satisfaisante, car elle n'intègre pas à proprement parler Rodin dans l'écosystème OpenFlexo, et car elle implique l'exécution %
 d'une instance d'Eclipse en plus d'OpenFlexo.
@@ -103,7 +103,35 @@ Elle présente cependant le mérite de contourner l'obstacle, et demeure une sol
 \section{Développement d'une bibliothèque indépendante d'Eclipse}
 
 Nous souhaitons implémenter la surcouche de Rodin en tant que bibliothèque de classes qui ne dépend pas d'une instance d'Eclipse en cours d'exécution.
-Comme Rodin est malgré tout conçu en tant que plugin d'Eclipse, il nécessite une partie du cœur d'Eclipse, que nous devons initialiser nous-mêmes.
+Comme Rodin est conçu en tant que plugin d'Eclipse, il nécessite une partie du cœur d'Eclipse, que nous devons initialiser nous-mêmes.
+
+\subsection{Approche naïve : extension de la classe \texttt{RodinDB}}
+
+Nous souhaitons tout d'abord déterminer s'il est possible ou non d'instancier manuellement la classe \javacode{RodinDB}, sans passer par le \textit{workspace}.
+Son constructeur est cependant qualifié de \javacode{protected}.
+Nous prenons alors l'initiative d'étendre cette classe, par la classe \javacode{MyRodinDB}.
+
+\begin{imtaCode}{java}
+public class MyRodinDB extends RodinDB {
+    public MyRodinDB() {
+        super();
+    }
+}
+\end{imtaCode}
+
+Cependant, lorsque nous instancions cette classe en mode non-plugin, l'erreur suivante est levée~:
+
+\begin{imtaConsole}
+Exception in thread "main" java.lang.IllegalStateException: Workspace is closed.
+	at org.eclipse.core.resources.ResourcesPlugin.getWorkspace(ResourcesPlugin.java:412)
+	at org.rodinp.internal.core.RodinDB.getRodinProject(RodinDB.java:226)
+	at Test.Main.createRodinProject(Main.java:18)
+	at Test.Main.main(Main.java:48)
+\end{imtaConsole}
+
+Cela confirme qu'un \textit{workspace} doit effectivement être ouvert.
+Nous nous attachons donc à trouver une méthode permettant de procéder à cette ouverture.
+
 
 \subsection{Ouverture du \textit{workspace}}
 
