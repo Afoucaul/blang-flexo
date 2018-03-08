@@ -109,11 +109,13 @@
 
 %%%%%%%%%% COLORS %%%%%%%%%%
 
-% The three colors of IMTA: green, light blue, and dark blue
+% The three colors of IMTA: green, light blue, and dark blue, plus the gray
 \definecolor{imtaGreen}{RGB}{164, 210, 51}
 \definecolor{imtaLightBlue}{RGB}{0, 184, 222}
 \definecolor{imtaDarkBlue}{RGB}{12, 35, 64}
 \definecolor{imtaGray}{RGB}{87, 87, 87}
+
+\definecolor{imtaQuoteBackground}{RGB}{245, 245, 245}
 
 
 
@@ -122,7 +124,7 @@
 \raggedbottom
 
 % Itemize customization
-\setitemize[1]{label=\textcolor{imtaLightBlue}{\ding{228}}}
+\setitemize[1]{label=\textcolor{imtaLightBlue}{\small\ding{228}}}
 \setitemize[2]{label=\textbullet}
 
 
@@ -239,13 +241,13 @@
             \fill[imtaLightBlue] (0,0) -- (2,0) -- (3,-1) -- (4,0) -- (4,-1) -- %
                                           (5,0) -- (7,0) -- (5,-2) -- (5,-1) -- (4,-1) -- %
                                           (4,-2) -- (2,-2) -- (2,0) -- (0,-2) -- (0,0);
-            \node [anchor=west] at (-0.145,-2.68) {
-                \fontsize{20}{23}
+            \node [anchor=west] at (0,-2.75) {
+                \fontsize{19.5}{23}
                 \fontfamily{phv}\selectfont \textbf{IMT Atlantique}};
-            \node [anchor=north west] at (-0.145,-3.13) {
+            \node [anchor=north west] at (0,-3.18) {
                 \fontsize{15}{18}
                 \fontfamily{phv}\selectfont Bretagne-Pays de la Loire};
-            \node [anchor=south west] at (-0.145,-4.18) {
+            \node [anchor=south west] at (0,-4.18) {
                 \fontsize{15}{18}
                 \fontfamily{phv}\selectfont École Mines-Télécom};
         \end{tikzpicture}  
@@ -297,14 +299,10 @@
         \filldraw[draw=imtaDarkBlue,fill=imtaDarkBlue] (-5.24\imtaGetEltSize,0) -- (-2.24\imtaGetEltSize,-3\imtaGetEltSize) -- (-5.24\imtaGetEltSize,-3\imtaGetEltSize) -- cycle;
         
         \node (date) [draw=none, text width=\textwidth, align=left, anchor=north west] at (-\textwidth, -4\imtaGetEltSize) {
-            \large\fontfamily{phv}\selectfont\thedate\linebreak
-            \large\fontfamily{phv}\selectfont\theauthor\linebreak
-            \if\imtaTheSuperviser\relax\relax
-                \relax
-            \else
-                \vspace{1.25ex}\linebreak
-                \large\fontfamily{phv}\imtaTheSuperviser\linebreak
-            \fi
+            \large\fontfamily{phv}\selectfont\thedate \\
+            \large\fontfamily{phv}\selectfont\theauthor \\
+            \vspace{1.25ex}
+            \large\fontfamily{phv}\imtaTheSuperviser
             \vspace*{1cm}};
         \end{tikzpicture}
     \end{flushright}
@@ -547,6 +545,18 @@
          \relax
      \fi
  \makeatother
+
+
+\newenvironment{imtaQuote}{%
+    \begin{quote}
+        \begin{mdframed}[backgroundcolor=imtaQuoteBackground, linewidth=0pt]
+            \textcolor{imtaLightBlue}{\Large \ding{125}}
+            \itshape\rmfamily\selectfont
+}{%
+            \textcolor{imtaLightBlue}{\Large \ding{126}}
+        \end{mdframed}
+    \end{quote}
+}
 
 %%%%%%%%%% END %%%%%%%%%% 
 %%%%%%%%%%%%%%%%%%%%%%%%% 

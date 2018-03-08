@@ -274,12 +274,12 @@ En creusant de plus en plus profondément le code source et le \textit{bytecode}
 Cela est dû au fait que la classe \javacode{Workspace} est instanciée par Eclipse à l'initialisation.
 Ainsi, pour ouvrir manuellement un \textit{workspace}, il faut reproduire au moins partiellement les étapes d'initialisation d'Eclipse, ce qui est fatalement très lourd.
 Pour appuyer ce fait, la documentation de la classe \javacode{ResourcesPlugin} \cite{eclipseresourcesplugin} nous indique que le \textit{workspace} est censé être initialisé à travers la méthode %
-\javacode{ResourcesPlugin.getWorkspace}~:
+\javacode{ResourcesPlugin.getWorkspace}~:\\
 
-\begin{quote}
-A typical sequence of events would be for a dependent plug-in to call ResourcesPlugin.getWorkspace().
+\begin{imtaQuote}
+A typical sequence of events would be for a dependent plug-in to call\\ResourcesPlugin.getWorkspace().
 Doing so would cause this plug-in to be activated and the workspace (if any) to be loaded from disk and initialized.
-\end{quote}
+\end{imtaQuote}
 
 Or, un appel à la méthode \javacode{getWorkspace} résulte en une erreur, tout comme un appel à la méthode \javacode{start}.
 Nous comprenons qu'il sera très complexe de mettre en œuvre une partie de l'API Eclipse sans lancer toute la machinerie.
