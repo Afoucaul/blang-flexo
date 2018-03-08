@@ -93,10 +93,11 @@ Cela permettrait de produire une bibliothèque de classes fermée et sans dépen
 Une telle bibliothèque serait relativement simple à intégrer à OpenFlexo.
 Cette solution offrirait par effet de bord une preuve de concept de l'intégration d'une application RCP Eclipse à OpenFlexo.
 
-Une alternative, nettement moins désirable, consisterait à lancer effectivement une instance de Rodin dans laquelle s'exécuterait un plugin, qui communiquerait %
+Une alternative, consisterait à lancer effectivement une instance de Rodin dans laquelle s'exécuterait un plugin, qui communiquerait %
 en réseau, par exemple sur une socket Unix, avec l'instance d'OpenFlexo.
-Cette solution, bien qu'elle ait le mérite de contourner l'obstacle, est très peu satisfaisante, car elle n'intègre pas à proprement parler Rodin dans l'écosystème OpenFlexo.
-Par ailleurs, elle implique l'exécution d'une instance d'Eclipse en plus d'OpenFlexo, et entraîne une consommation peu utile de ressources supplémentaires.
+Cette solution est moins satisfaisante, car elle n'intègre pas à proprement parler Rodin dans l'écosystème OpenFlexo, et car elle implique l'exécution %
+d'une instance d'Eclipse en plus d'OpenFlexo.
+Elle présente cependant le mérite de contourner l'obstacle, et demeure une solution acceptable dans l'optique de réaliser une preuve de concept.
 
 
 \section{Développement d'une bibliothèque indépendante d'Eclipse}
