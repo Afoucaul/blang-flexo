@@ -7,13 +7,20 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.ServiceLoader;
 
+import org.eclipse.core.internal.content.Activator;
+import org.eclipse.core.internal.resources.LocalMetaArea;
+import org.eclipse.core.internal.resources.Project;
 import org.eclipse.core.internal.resources.Workspace;
+import org.eclipse.core.internal.runtime.InternalPlatform;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.Platform;
 import org.eventb.core.EventBPlugin;
+import org.eventb.core.ICommentedElement;
+import org.eventb.internal.core.EventBProject;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
@@ -22,14 +29,32 @@ import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.launch.Framework;
 import org.osgi.framework.launch.FrameworkFactory;
 import org.rodinp.core.IRodinDB;
+import org.rodinp.core.IRodinFile;
 import org.rodinp.core.IRodinProject;
 import org.rodinp.core.RodinCore;
+import org.rodinp.internal.core.RodinProject;
 
 public class ApiHandle {
+	
+	private static Framework framework;
+	private static BundleContext context;
 	
 	private static final LinkedHashMap<String, String> jarLocations;
 	static {
 		jarLocations = new LinkedHashMap<String, String>();
+
+		jarLocations.put(
+				"org.eclipse.osgi.services",
+				"/home/armand/Programs/rodin/plugins/org.eclipse.osgi.services_3.5.100.v20160504-1419.jar");
+		jarLocations.put(
+				"com.ibm.icu",
+				"/home/armand/Programs/rodin/plugins/com.ibm.icu_56.1.0.v201601250100.jar");
+		jarLocations.put(
+				"org.eclipse.core.variables",
+				"/home/armand/Programs/rodin/plugins/org.eclipse.core.variables_3.3.0.v20160419-1720.jar");
+		jarLocations.put(
+				"org.eclipse.debug.core",
+				"/home/armand/Programs/rodin/plugins/org.eclipse.debug.core_3.10.100.v20160419-1720.jar");
 		jarLocations.put(
 				"org.eclipse.equinox.app",
 				"/home/armand/Programs/rodin/plugins/org.eclipse.equinox.app_1.3.400.v20150715-1528.jar");
@@ -110,29 +135,40 @@ public class ApiHandle {
 		}
 	}
 	
-	// XXX SEHR WICHTIG
-	/*
-	public static void startWorkspace() throws Exception {
-		Bundle bundle = new Bundle();
-		BundleContext context = bundle.getBundleContext();
-		EventBPlugin plugin = new EventBPlugin();
-		plugin.start(context);
+	public static IRodinFile createRodinConstruct(final String filename, final IRodinProject rProject, final String comment) {
+		if (rProject == null)
+			return null;
+		try {
+			final IRodinFile rodinFile = rProject.getRodinFile(filename);
+			rodinFile.create(true, null);
+			rodinFile.getResource().setDerived(true);    // mark the file as derived
+			if (rodinFile instanceof ICommentedElement)
+ 				if (comment != null && !comment.trim().equals(""))
+					((ICommentedElement) rodinFile).setComment(comment, null);
+			return rodinFile;
+		} catch (final Exception e) {
+			System.out.println(e);
+			return null;
+		}
 	}
-	*/
 	
-	// Wichtiger und besser
-	public static void startBundle() throws Exception {		
+	private static void startFramework() throws BundleException {
 		FrameworkFactory frameworkFactory = ServiceLoader.load(FrameworkFactory.class).iterator().next();
 		Map<String, String> config = new HashMap<String, String>();
-		// TODO: add some config properties
-		Framework framework = frameworkFactory.newFramework(config);
+		framework = frameworkFactory.newFramework(config);
 		framework.start();
-
-		BundleContext context = framework.getBundleContext();
+	}
+	
+	private static void startContext() {
+		context = framework.getBundleContext();
+	}
+	
+	// Wichtiger und besser
+	public static void startBundles() throws Exception {
+		System.out.println("Loading bundles...");
 		
 		LinkedList<Bundle> bundles = new LinkedList<Bundle>();
 		
-		System.out.println("Loading bundles...");
 		for (Map.Entry<String, String> entry : jarLocations.entrySet()) {
 			String key = entry.getKey();
 			String value = entry.getValue();
@@ -150,8 +186,29 @@ public class ApiHandle {
 	}
 	
 	public static void main(String[] args) throws Exception {
-		startBundle();
-		//Workspace workspace = new Workspace();
-		//createRodinProject("testProject1");
+		startFramework();
+		startContext();
+		startBundles();
+		
+		InternalPlatform.getDefault().start(context);
+
+		// LocalMetaArea localMetaArea = new LocalMetaArea();
+		// System.out.println(ResourcesPlugin.getPlugin());
+		
+		ResourcesPlugin resourcesPlugin = new ResourcesPlugin();
+		resourcesPlugin.start(context);
+		
+		// Activator activator = new Activator();
+		// activator.start(context);
+		
+		// System.out.println(Activator.getDefault());
+		
+		
+		// Instanciation du workspace
+		// Workspace workspace = new Workspace();
+	
+		
+		
+		//ResourcesPlugin.getWorkspace();
 	}
 }
