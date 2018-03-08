@@ -7,21 +7,54 @@ import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eventb.core.ICommentedElement;
 import org.rodinp.core.IRodinDB;
 import org.rodinp.core.IRodinFile;
 import org.rodinp.core.IRodinProject;
 import org.rodinp.core.RodinCore;
 import org.rodinp.core.basis.RodinElement;
+import org.rodinp.internal.core.RodinProject;
 
 public class ApiAbstractor {
-	private static IWorkspace 	workspace	= null;
-	private static IRodinDB		rodinDB		= null;
-	private static HashMap<Pair<Class, String>, Object> environment;
+	private static boolean 								started 	= false;
+	private static IWorkspace 							workspace	= null;
+	private static IRodinDB								rodinDB		= null;
+	private static HashMap<Pair<Class, String>, Object> environment = null;
 	
 	
-	private static void start() {
+	private static void say(String message) {
+		System.out.println(message);
+	}	
+	
+	private static void fail(String message, Exception error) {
+		System.out.println(message + "\n\tError: " + error);
+	}
+	
+	public static void start() {
+		say("Starting API abstractor...");
+		
 		initWorkspace();
 		initRodinDB();
+		environment = new HashMap<>();
+		
+		started = true;
+		say("API abstractor started.");
+	}
+	
+	public static boolean isStarted() {
+		return started;
+	}
+	
+	private static void dumpEnvironment() {
+		say("Environment: {");
+		for(Pair<Class, String> key : environment.keySet()) {
+			say("\t" + key.second + ": " + key.first);
+		}
+		say("}");
+	}
+	
+	public static void dumpState() {
+		dumpEnvironment();
 	}
 	
 	private static void initWorkspace() {
@@ -34,13 +67,27 @@ public class ApiAbstractor {
 	
 	private static void insertIntoEnvironment(Object element, String name) {
 		Pair<Class, String> key = new Pair(element.getClass(), name);
-		System.out.println("Inserting " + element.getClass() + " instance '" + name + "'");
+		say("Inserting " + element.getClass() + " instance '" + name + "'");
 		environment.put(key, element);
+		dumpEnvironment();
 	}
 	
 	private static Object lookupEnvironment(Class type, String name) {
-		Pair<String, Class> key = new Pair(type, name);
-		return environment.get(key);
+		Pair<Class, String> key = new Pair(type, name);
+		say("Performing lookup: " + key.toString());
+		
+		Object result = null;
+		for (Pair itKey : environment.keySet()) {
+			if (itKey.equals(key)) {
+				result = environment.get(itKey);
+				break;
+			}
+		}
+		
+		if (result == null)
+			say("Could not find " + type + " instance '" + name + "'");
+		
+		return result;
 	}
 	
 	public static IRodinProject createRodinProject(final String projectName) throws ApiAbstractorException {
@@ -67,32 +114,33 @@ public class ApiAbstractor {
 				description.setNatureIds(newNatures);
 				project.setDescription(description, null);
 			}
-			project.setDerived(true); // ???
+			//project.setDerived(true); // ???
 			
 			insertIntoEnvironment(rodinProject, projectName);
 			return rodinProject;
 			
 		} catch (final CoreException ex) {
-			System.out.println("Could not create Rodin project\n\tError:" + ex);
-			throw new ApiAbstractorException();
+			fail("Could not create Rodin project", ex);
+			throw new ApiAbstractorException(ex);
 		}
 	}
-	/*
-	public static IRodinFile createRodinConstruct(final String projectName, final String fileName) {
-		RodinProject = 
-		if (rProject == null)
+	
+	public static IRodinFile createRodinConstruct(final String projectName, final String fileName) throws ApiAbstractorException {
+		RodinProject project = (RodinProject) lookupEnvironment(RodinProject.class, projectName);
+		if (project == null)
 			return null;
+		
 		try {
-			final IRodinFile rodinFile = rProject.getRodinFile(filename);
+			final IRodinFile rodinFile = project.getRodinFile(fileName);
 			rodinFile.create(true, null);
-			rodinFile.getResource().setDerived(true);    // mark the file as derived
-			if (rodinFile instanceof ICommentedElement)
- 				if (comment != null && !comment.trim().equals(""))
-					((ICommentedElement) rodinFile).setComment(comment, null);
+			//rodinFile.getResource().setDerived(true);    // mark the file as derived
+			
+			insertIntoEnvironment(rodinFile, fileName);
 			return rodinFile;
-		} catch (final Exception e) {
-                       .... exception code ....
+		} catch (final Exception ex) {
+			fail("Could not create Rodin construct", ex);
+			throw new ApiAbstractorException(ex);
 		}
 	}
-	*/
+	
 }
