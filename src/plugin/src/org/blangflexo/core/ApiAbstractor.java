@@ -9,8 +9,12 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eventb.core.ICommentedElement;
 import org.eventb.core.IEvent;
+import org.eventb.core.IIdentifierElement;
+import org.eventb.core.ILabeledElement;
+import org.eventb.core.IRefinesEvent;
 import org.eventb.core.basis.Event;
 import org.rodinp.core.IInternalElement;
+import org.rodinp.core.IInternalElementType;
 import org.rodinp.core.IRodinDB;
 import org.rodinp.core.IRodinFile;
 import org.rodinp.core.IRodinProject;
@@ -152,7 +156,32 @@ public class ApiAbstractor {
 			throw fail("Could not create machine", ex);
 		}
 	}
+	
+	public static IInternalElement createRodinElement(
+			final IInternalElementType type,
+			final String name,
+			final IInternalElement parent,
+			final IRodinFile rodinFile)
+		throws ApiAbstractorException
+		{
+		if (parent == null) return null;
+		try {
+			final IInternalElement rodinEl = parent.getInternalElement(type, name);
+			rodinEl.create(null, null);
+			if (rodinEl instanceof ILabeledElement)
+				((ILabeledElement) rodinEl).setLabel(name, null);
+			if (rodinEl instanceof IIdentifierElement)
+				((IIdentifierElement) rodinEl).setIdentifierString(name, null);
+			if (rodinEl instanceof IRefinesEvent)
+				((IRefinesEvent) rodinEl).setAbstractEventLabel(name, null);
+			return rodinEl;
+			
+		} catch (final Exception ex) {
+			throw fail("Could not create event", ex);
+		}
+	}
 
+	/*
 	public static IEvent addEvent(String machineName, final String eventName) throws ApiAbstractorException {
 		machineName += ".bum";
 		
@@ -171,5 +200,15 @@ public class ApiAbstractor {
 		} catch (final Exception ex) {
 			throw fail("Could not add event '" + eventName + "' to machine '" + machineName + "'", ex);
 		}
-	}	
+	}
+	*/
+	
+	public static IEvent addEvent(String machineName, final String eventName) throws ApiAbstractorException {
+		machineName += ".bum";
+		RodinFile machine = (RodinFile) lookupEnvironment(RodinFile.class, machineName);
+		if (machine == null)
+			throw new ApiAbstractorException("Machine '" + machineName + "' not found");
+		
+		return (IEvent) createRodinElement(IEvent.ELEMENT_TYPE, eventName, machine.getRoot(), machine);
+	}
 }
