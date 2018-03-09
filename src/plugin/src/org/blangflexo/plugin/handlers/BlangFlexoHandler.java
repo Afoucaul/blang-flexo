@@ -2,6 +2,7 @@ package org.blangflexo.plugin.handlers;
 
 import org.blangflexo.core.ApiAbstractor;
 import org.blangflexo.core.ApiAbstractorException;
+import org.blangflexo.plugin.OperationListener;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
@@ -21,17 +22,16 @@ public class BlangFlexoHandler extends AbstractHandler {
 		if (!ApiAbstractor.isStarted())
 			ApiAbstractor.start();
 		IWorkbenchWindow window = HandlerUtil.getActiveWorkbenchWindowChecked(event);
-		try {
-			ApiAbstractor.createRodinProject("hello");
-			ApiAbstractor.createMachine("hello", "machine1");
-			ApiAbstractor.addEvent("machine1", "initialisation");
-			ApiAbstractor.addAction("initialisation", "initialize");
-			ApiAbstractor.addGuard("initialisation", "check");
-			ApiAbstractor.addVariable("machine1", "xx");
-		} catch (ApiAbstractorException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+
+		new OperationListener(20001).start();
+		/*
+		ApiAbstractor.createRodinProject("hello");
+		ApiAbstractor.createMachine("hello", "machine1");
+		ApiAbstractor.addEvent("machine1", "initialisation");
+		ApiAbstractor.addAction("initialisation", "initialize");
+		ApiAbstractor.addGuard("initialisation", "check");
+		ApiAbstractor.addVariable("machine1", "xx");
+		*/
 		return null;
 	}
 }
