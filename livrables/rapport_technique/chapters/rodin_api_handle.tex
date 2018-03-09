@@ -1,28 +1,14 @@
 \chapter{Abstraction de l'API Rodin}\label{sec:apihandle}
 
 Nous souhaitons abstraire les fonctionnalités de gestion de projet de l'API Rodin, afin de fournir une surcouche simple d'utilisation.
+Afin de proposer une preuve de concept simple, nous écartons les problématiques de raffinement, et concentrons nos efforts sur des fonctionnalités simples.
 Faisant écho aux scénarios de validation, nous présentons d'abord les fonctions abstraites que nous voulons pouvoir appeler sur cette surcouche.
 
 
 \section{Aperçu de la surcouche}
 
-Nous nous proposons de créer une classe \imtaInlinecode{java}{RodinApiHandle}, qui va proposer les différentes fonctions de la surcouche.
-Cette classe présentera l'interface suivante :
-
-% \begin{table}[H]
-%     \centering
-%     \begin{tabular}{| l | l | l |}
-%         \hline
-%         \multicolumn{1}{|c|}{Modificateurs} & \multicolumn{1}{|c|}{Signature} & \multicolumn{1}{|c|}{Description}\\
-%         \hline\hline
-%         \texttt{public static} & \texttt{IRodinProject createRodinProject(final String name)} & Création d'un projet Rodin\\
-%         \hline
-%         \texttt{public static} & \texttt{IRodinProject createEventbMachine(IRodinProject, final String name)} & Création d'une machine Event-B dans un projet\\
-%         \hline
-%     \end{tabular}
-%     \caption{Interface externe de la surcouche Rodin}
-%     \label{table:rodinApiHandle}
-% \end{table}
+Nous nous proposons de créer une classe \imtaInlinecode{java}{RodinApiHandle}, qui proposera les différentes fonctions de la surcouche.
+Cette classe présentera l'interface suivante~:
 
 \vspace{\baselineskip}
 \begin{labeling}{public static}
@@ -46,10 +32,35 @@ Cette classe présentera l'interface suivante :
                 \begin{itemize}
                     \item \javacode{org.rodinp.core.IRodinProject}
                     \item \javacode{org.rodinp.core.IRodinFile}
+                    \item \javacode{org.eventb.core.IMachineRoot}
+                \end{itemize}
+        \end{itemize}
+
+    \item [\javacode{public static}] \javacode{IEvent addEvent(IMachineRoot machine, final String name)}
+        \begin{itemize}[label={}]
+            \item Création d'un évènement dans la machine donnée.
+            \item \textit{Dépend de :}
+                \begin{itemize}
+                    \item \javacode{org.eventb.core.IMachineRoot}
+                    \item \javacode{org.eventb.core.IEvent}
+                \end{itemize}
+        \end{itemize}
+
+    \item [\javacode{public static}] \javacode{IAction addAction(IEvent event, final String name)}
+        \begin{itemize}[label={}]
+            \item Ajout d'une action à l'évènement donné.
+            \item \textit{Dépend de :}
+                \begin{itemize}
+                    \item \javacode{org.eventb.core.IEvent}
+                    \item \javacode{org.eventb.core.IAction}
                 \end{itemize}
         \end{itemize}
 
 \end{labeling}
+
+Nous ne mentionnons pas la création d'éléments autres que les évènements et les actions, dans la mesure où l'opération sera la même.
+Par la suite, d'autres fonctionnalités viendront s'ajouter, notamment le déplacement et la suppression d'éléments.
+La gestion des raffinements et des contextes sera nécessaire sur le long terme, et à prendre en compte pour une suite à notre preuve de concept.
 
 
 \section{Défis de conception}
@@ -324,4 +335,43 @@ La solution que nous nous proposons de réaliser consiste à abstraire l'API de 
 avec l'instance d'OpenFlexo
 Cette approche permet de s'affranchir des problèmes d'initialisation de \textit{workspace}, puisqu'Eclipse s'en charge alors à notre place.
 
-% TODO
+Nous créons un projet Eclipse de type \textit{plugin}, que nous nommons \textit{BlangFlexoPlugin}.
+Ce projet est composé de deux packages~: \javacode{org.blangflexo.core}, et \javacode{org.blangflexo.plugin}.
+Le premier se charge d'abstraire l'API de Rodin, et le second implémente l'écoute d'un canal de communication.
+
+\subsection{Le cœur de la surcouche~: \texttt{org.blangflexo.core}}
+
+Le cœur de notre plugin repose sur la classe \javacode{ApiAbstractor}.
+Celle-ci fournit l'abstraction désirée pour pouvoir exécuter des instructions venant de l'extérieur.
+Dans le cadre de notre preuve de concept, nous nous limitons aux fonctionnalités élémentaires, ainsi qu'à la manipulation de quelques éléments de projet Rodin.
+
+\subsubsection{Fonctionnalités de l'abstraction de l'API Rodin}
+
+L'interface publique de la classe \javacode{org.blangflexo.core.ApiAbstractor} est la suivante~:
+
+\begin{table}[H]
+    \centering
+    \renewcommand*{\arraystretch}{1.2}
+    \begin{tabular}{l l}
+        \hline
+        Qualificateurs et type & Méthode et description\\\hline\hline
+        \multirow{2}{*}{\javacode{public static void}} & \javacode{start()} \\ & Démarre la communication avec l'API de Rodin\\\\
+        \multirow{2}{*}{\javacode{public static boolean}} & \javacode{isStarted()} \\ & Indique si oui ou non la communication avec l'API de Rodin est établie\\\\
+        \multirow{2}{*}{\javacode{public static IRodinProject}} & \javacode{createRodinProject(String name)} \\ & Crée un projet dans le workspace courant avec le nom donné\\\\
+        \multirow{2}{*}{\javacode{public static IRodinFile}} & \javacode{createMachine(String projectName, String machineName)} \\ & Crée une machine avec le nom donné dans le projet spécifié\\\\
+        \multirow{2}{*}{\javacode{public static IEvent}} & \javacode{addEvent(String machineName, String eventName)} \\ & Ajoute un évènement à la machine donnée\\\\
+        \multirow{2}{*}{\javacode{public static IAction}} & \javacode{addAction(String eventName, String actionName)} \\ & Ajoute une action à l'évènement donné\\\\
+        \multirow{2}{*}{\javacode{public static IGuard}} & \javacode{addGuard(String eventName, String guardName)} \\ & Ajoute une garde à l'évènement donné\\\\
+        \multirow{2}{*}{\javacode{public static IVariable}} & \javacode{addVariable(String machineName, String variableName)} \\ & Ajoute une variable à la machine donnée\\\\
+        \hline
+    \end{tabular}
+    \caption{Interface de la classe \texttt{ApiAbstractor}}
+    \label{tab:apiAbstractor}
+\end{table}
+
+Ces méthodes permettent de construire un projet Rodin, en lui ajoutant des éléments.
+L'idée de cette interface est de ne manipuler que des chaînes de caractères, afin de faciliter la communication à venir.
+Ainsi, l'ajout de la variable \(xx\) à la machine \(Mac\) peut se sérialiser en un ordre tel que \texttt{addvar, Mac, xx}.
+
+
+\subsubsection{Fonctionnement interne de l'abstraction}
