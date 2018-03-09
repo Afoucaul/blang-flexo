@@ -25,6 +25,9 @@ public class BlangFlexoHandler extends AbstractHandler {
 			ApiAbstractor.createRodinProject("hello");
 			ApiAbstractor.createMachine("hello", "machine1");
 			ApiAbstractor.addEvent("machine1", "initialisation");
+			ApiAbstractor.addAction("initialisation", "initialize");
+			ApiAbstractor.addGuard("initialisation", "check");
+			ApiAbstractor.addVariable("machine1", "xx");
 		} catch (ApiAbstractorException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
