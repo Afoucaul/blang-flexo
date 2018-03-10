@@ -384,7 +384,7 @@ public static boolean dispatchInstruction(Operation operation, String[] args) th
 \end{imtaCode}
 
 
-\subsubsection{Communication avec un client léger}
+\subsubsection{Test de communication avec un client léger}
 
 Nous nous proposons de tester notre plugin avec un client simple écrit en Python.
 Le code que nous utilisons est le suivant~:
@@ -394,11 +394,7 @@ import socket as net
 import sys
 
 
-try:
-    host, port = sys.argv[1:3]
-except ValueError:
-    print("Usage:\n\t{} host port".format(__file__))
-    sys.exit(1)
+host, port = sys.argv[1:3]
 
 port = int(port)
 sock = net.socket(net.AF_INET, net.SOCK_STREAM)
@@ -409,7 +405,18 @@ while True:
     sock.send(bytes(line + "\n", "ASCII"))
 \end{imtaCode}
 
-Nous illustrons par les figures suivantes l'utilisation du plugin avec ce client.
+Nous jouons le scénario suivant~:
+
+\begin{enumerate}
+\item Établissement de la communication avec le serveur Rodin (figure \ref{fig:rodinCommunication1})
+\item Création d'un projet \texttt{newProject} (figure \ref{fig:rodinCommunication2})
+\item Ajout d'une machine \texttt{machine1} au projet \texttt{newProject} (figure \ref{fig:rodinCommunication3})
+\item Ajout d'un évènement \texttt{initialisation} à la machine \texttt{machine1} (figure \ref{fig:rodinCommunication4})
+\item Ajout d'une action \texttt{do\_something} à l'évènement \texttt{initialisation} (figure \ref{fig:rodinCommunication5})
+\item Ajout d'une garde \texttt{provided} à l'évènement \texttt{initialisation} (figure \ref{fig:rodinCommunication6})
+\item Ajout d'une variable \texttt{my\_variable} à la machine \texttt{machine1} (figure \ref{fig:rodinCommunication7})
+\end{enumerate}
+
 
 \begin{figure}[H]
     \centering
