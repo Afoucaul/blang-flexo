@@ -229,4 +229,70 @@ de réaliser la communication désirée.
 
 \section{Communiquer avec OpenFlexo~: le package \texttt{org.blangflexo.plugin}}
 
-%TODO
+% TODO: expliquer rapidement
+
+\subsection{Point d'entrée du plugin}
+
+L'exécution du plugin commence au moment où l'utilisateur appuie sur le bouton ajouté à la barre d'outils de Rodin.
+Le \textit{handler} principal du plugin a pour seule fonction de démarrer l'écoute d'instructions, à travers la classe \javacode{InstructionListener} que nous présentons à la section suivante.
+
+\begin{imtaCode}{java}
+public class BlangFlexoHandler extends AbstractHandler {
+    
+    
+    @Override
+    public Object execute(ExecutionEvent event) throws ExecutionException {
+        if (!ApiAbstractor.isStarted())
+        	ApiAbstractor.start();
+        
+        new InstructionListener(20001).start();
+        return null;
+    }
+}
+\end{imtaCode}
+
+\subsection{Implémentation d'un serveur TCP}
+
+Nous souhaitons que notre plugin écoute sur une socket TCP les instructions envoyées par OpenFlexo.
+Nous implémentons donc un serveur TCP, et OpenFlexo lui enverra ses commandes en mode client.
+
+Le serveur TCP est implémenté par la classe \javacode{org.blangflexo.plugin.InstructionListener}.
+Son fonctionnement est volontairement simple~: il attend une connexion sur le port \texttt{20001}, et une fois une connexion acceptée, attend une instruction et l'exécute.
+Il renvoie enfin un message indiquant si l'instruction s'est exécutée correctement.
+
+Le serveur est implémenté sous la forme d'un thread, afin de ne pas interférer avec le thread principal d'Eclipse.
+Son cycle de vie est implémenté par la méthode \javacode{InstructionListener.run} que nous présentons ici.
+La gestion des erreurs et de la fermeture propre de la socket a volontairement été cachée dans le code qui suit pour des raisons de lisibilité, mais est naturellement %
+présente dans le code.
+
+\begin{imtaCode}{java}
+public void run() {
+    String instruction;
+    String response;
+    ServerSocket socket;
+    BufferedReader inFromClient;
+    DataOutputStream outToClient;
+    
+    // Ouverture de la socket d'écoute sur 'port', attribut d'instance
+    socket = new ServerSocket(port);
+    
+    // Acceptation de la connexion cliente
+    Socket connectionSocket = socket.accept();
+    
+    // Création des canaux de communication
+    inFromClient = new BufferedReader(new InputStreamReader(connectionSocket.getInputStream()));
+    outToClient = new DataOutputStream(connectionSocket.getOutputStream());
+    
+    // REPL
+    while (true) {
+        instruction = inFromClient.readLine();
+        boolean success = ApiOperationDispatcher.execute(instruction);
+        response = success ? "Success" : "Failure";
+        outToClient.writeBytes(response);
+    }
+}
+\end{imtaCode}
+
+Les messages reçus par le serveur sont transmis à la classe \javacode{ApiOperationDispatcher}, qui se charge de les interpréter en tant qu'instructions, et de les exécuter.
+
+\subsection{Exécution des instructions}
