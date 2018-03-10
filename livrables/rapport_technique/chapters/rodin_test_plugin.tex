@@ -229,7 +229,9 @@ de réaliser la communication désirée.
 
 \section{Communiquer avec OpenFlexo~: le package \texttt{org.blangflexo.plugin}}
 
-% TODO: expliquer rapidement
+Le plugin que nous nous proposons d'implémenter consiste en un serveur TCP écoutant des instructions de manipulation de projet.
+Lorsque l'utilisateur clique sur le bouton ajouté par le plugin, l'écoute commence.
+Lorsqu'un message arrive, il est traduit en instruction, et cette dernière est exécutée, créant ainsi l'élément de projet désiré.
 
 \subsection{Point d'entrée du plugin}
 
@@ -293,6 +295,167 @@ public void run() {
 }
 \end{imtaCode}
 
-Les messages reçus par le serveur sont transmis à la classe \javacode{ApiOperationDispatcher}, qui se charge de les interpréter en tant qu'instructions, et de les exécuter.
 
-\subsection{Exécution des instructions}
+\subsubsection*{Format des instructions}
+Les instructions sont des chaînes de caractères encodées en ASCII, consistant en une liste de champs séparés par des points-virgules.
+Le premier champ d'un message représente l'indice de l'opération à effectuer (voir section \ref{sec:instructionexecution}, et les champs suivants représentent les arguments.
+Ainsi, le message \texttt{1;NewProject} indique à Rodin de créer le projet \textit{NewProject}, et le message \texttt{2;NewProject;Machine1} lui indique de créer une machine %
+\textit{Machine1} dans ce même projet.
+\\
+
+\subsection{Exécution des instructions}\label{sec:instructionexecution}
+
+Les messages reçus par le serveur sont transmis à la classe \javacode{ApiInstructionDispatcher}, qui se charge de les interpréter en tant qu'instructions, et de les exécuter.
+La classe \javacode{ApiInstructionDispatcher} possède pour point d'entrée la méthode statique \javacode{execute}, prenant en argument une instruction sous la forme d'une chaîne de caractère.
+L'instruction reçue est donc décodée, en suivant le format de messages expliqué plus tôt.
+Puis, en fonction de l'opération indiquée par le message, la fonction correspondante de la classe \javacode{ApiAbstractor} est invoquée.
+
+Les opérations sont définies par l'énumération imbriquée \javacode{Operation}~:
+
+\begin{imtaCode}{java}
+private static enum Operation {
+    CREATE_PROJECT,
+    CREATE_MACHINE,
+    ADD_EVENT,
+    ADD_ACTION,
+    ADD_GUARD,
+    ADD_VARIABLE;
+
+    public static Operation fromInt(int value) {
+        switch (value) {
+            case 1:
+                return CREATE_PROJECT;
+            case 2:
+                return CREATE_MACHINE;
+            case 3:
+                return ADD_EVENT;
+            case 4:
+                return ADD_ACTION;
+            case 5:
+                return ADD_GUARD;
+            case 6:
+                return ADD_VARIABLE;
+
+            default:
+                return null;
+        }
+    }
+}
+\end{imtaCode}
+
+Une fois l'opération déterminée, la méthode \javacode{execute} donne la main à la fonction \javacode{dispatchInstruction}.
+Celle-ci appelle simplement la bonne méthode avec les bons arguments, en fonction de l'opération demandée.
+Le corps de cette fonction est le suivant~:
+
+\begin{imtaCode}{java}
+public static boolean dispatchInstruction(Operation operation, String[] args) throws ApiAbstractorException {
+    Object result = null;
+    switch (operation) {
+        case CREATE_PROJECT:
+            result = ApiAbstractor.createRodinProject(args[0]);
+            break;
+                
+        case CREATE_MACHINE:
+            result = ApiAbstractor.createMachine(args[0], args[1]);
+            break;
+                
+        case ADD_EVENT:
+            result = ApiAbstractor.addEvent(args[0], args[1]);
+            break;
+                
+        case ADD_ACTION:
+            result = ApiAbstractor.addAction(args[0], args[1]);
+            break;
+                
+        case ADD_GUARD:
+            result = ApiAbstractor.addGuard(args[0], args[1]);
+            break;
+                
+        case ADD_VARIABLE:
+            result = ApiAbstractor.addVariable(args[0], args[1]);
+            break;
+                
+        default:
+            break;
+    }
+    
+    return result != null;
+}
+\end{imtaCode}
+
+
+\subsubsection{Communication avec un client léger}
+
+Nous nous proposons de tester notre plugin avec un client simple écrit en Python.
+Le code que nous utilisons est le suivant~:
+
+\begin{imtaCode}{python}
+import socket as net
+import sys
+
+
+try:
+    host, port = sys.argv[1:3]
+except ValueError:
+    print("Usage:\n\t{} host port".format(__file__))
+    sys.exit(1)
+
+port = int(port)
+sock = net.socket(net.AF_INET, net.SOCK_STREAM)
+sock.connect((host, port))
+
+while True:
+    line = input("Type in your message\n> ")
+    sock.send(bytes(line + "\n", "ASCII"))
+\end{imtaCode}
+
+Nous illustrons par les figures suivantes l'utilisation du plugin avec ce client.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics{pictures/rodinCommunication1.png}
+    \caption{Établissement de la connexion}
+    \label{fig:rodinCommunication1}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics{pictures/rodinCommunication2.png}
+    \caption{Création d'un projet \texttt{newProject}}
+    \label{fig:rodinCommunication2}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics{pictures/rodinCommunication3.png}
+    \caption{Création d'une machine \texttt{machine1} dans le projet \texttt{newProject}}
+    \label{fig:rodinCommunication3}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics{pictures/rodinCommunication4.png}
+    \caption{Ajout d'un évènement \texttt{initialisation} à la machine \texttt{machine1}}
+    \label{fig:rodinCommunication4}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics{pictures/rodinCommunication5.png}
+    \caption{Ajout de l'action \texttt{do\_something} à l'évènement \texttt{initialisation}}
+    \label{fig:rodinCommunication5}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics{pictures/rodinCommunication6.png}
+    \caption{Ajout de la garde \texttt{provided} à l'évènement \texttt{initialisation}}
+    \label{fig:rodinCommunication6}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics{pictures/rodinCommunication7.png}
+    \caption{Ajout de la variable \texttt{my\_variable} à la machine \texttt{machine1}}
+    \label{fig:rodinCommunication7}
+\end{figure}
