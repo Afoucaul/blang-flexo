@@ -63,7 +63,6 @@ Cette interface permet entre autres de manipuler plus génériquement les sous-�
 Ainsi, les accesseurs nommés spécialisés tels que \javacode{getAction(String name)} ou \javacode{getInvariant(String name)} sont généralisés par %
 la méthode \javacode{getInternalElement}, qui prend en paramètres le type de l'élément auquel accéder, et son nom.
 Le type est défini comme une instance de l'interface \javacode{IInternalElementType<T extends IInternalElement>}, %
-% ce qui permet de travailler avec des éléments de type indéterminé, en lui passant une instance de \javacode{IInternalElementType<IInternalElement>}.
 sachant que les interfaces d'élément Event-B définissent chacune leur type à travers une variable statique \javacode{ELEMENT_TYPE}, instance de %
 \javacode{IInternalElementType<T>} où \javacode{T} est l'interface elle-même.
 
@@ -178,6 +177,12 @@ Nous nous intéressons donc à l'interface \javacode{IRodinProject}.
 
 \subsection{Les projets Rodin et l'interface \texttt{IRodinProject}}
 
-% TODO
-Interface \javacode{IRodinProject}
-Classe \javacode{RodinProject}: attribut \javacode{IProject project}
+L'interface \javacode{IRodinProject} déclare deux accesseurs principaux~: \javacode{getRodinFile}, et \javacode{getProject}.
+
+La méthode \javacode{getRodinFile} renvoie un fichier associé au projet, que celui-ci existe ou non.
+Cette méthode permet de créer des machines et des contextes, en créant un fichier avec la bonne extension.
+Ainsi, \javacode{getRodinFile("machine.bum").create()}\footnote{Modulo les bons arguments pour la méthode \javacode{RodinFile.create}} crée une instance de \javacode{RodinFile}, %
+et l'écrit sous la forme d'une machine dans le projet.
+
+La méthode \javacode{getProject}, quant à elle, renvoie l'instance d'\javacode{IProject} à laquelle le projet Rodin est rattaché.
+L'interface \javacode{IProject} est définie dans le package d'Eclipse \javacode{org.eclipse.core.resources}, et décrit un projet Eclipse, là où \javacode{IRodinFile} décrit un projet Rodin.
