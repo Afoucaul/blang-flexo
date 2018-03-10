@@ -1,0 +1,514 @@
+\chapter{Abstraction de l'API Rodin}\label{sec:apihandle}
+
+Nous souhaitons abstraire les fonctionnalités de gestion de projet de l'API Rodin, afin de fournir une surcouche simple d'utilisation.
+Afin de proposer une preuve de concept simple, nous écartons les problématiques de raffinement, et concentrons nos efforts sur des fonctionnalités simples.
+Faisant écho aux scénarios de validation, nous présentons d'abord les fonctions abstraites que nous voulons pouvoir appeler sur cette surcouche.
+
+
+\section{Aperçu de la surcouche}
+
+Nous nous proposons de créer une classe \imtaInlinecode{java}{RodinApiHandle}, qui proposera les différentes fonctions de la surcouche.
+Cette classe présentera l'interface suivante~:
+
+\vspace{\baselineskip}
+\begin{labeling}{public static}
+    \setlength{\itemsep}{1.5em}
+
+    \item [\javacode{public static}] \javacode{IRodinProject createRodinProject(final String name)}
+        \begin{itemize}[label={}]
+            \item Création d'un projet Rodin avec le nom donné.
+            \item \textit{Dépend de :}
+                \begin{itemize}
+                    \item \javacode{org.eclipse.core.resources.IWorkspace}
+                    \item \javacode{org.eclipse.core.resources.IProject}
+                    \item \javacode{org.rodinp.core.IRodinProject}
+                \end{itemize}
+        \end{itemize}
+
+    \item [\javacode{public static}] \javacode{IMachineRoot createEventbMachine(IRodinProject project, final String name)}
+        \begin{itemize}[label={}]
+            \item Création d'une machine Event-B dans le projet donné et avec le nom donné.
+            \item \textit{Dépend de :}
+                \begin{itemize}
+                    \item \javacode{org.rodinp.core.IRodinProject}
+                    \item \javacode{org.rodinp.core.IRodinFile}
+                    \item \javacode{org.eventb.core.IMachineRoot}
+                \end{itemize}
+        \end{itemize}
+
+    \item [\javacode{public static}] \javacode{IEvent addEvent(IMachineRoot machine, final String name)}
+        \begin{itemize}[label={}]
+            \item Création d'un évènement dans la machine donnée.
+            \item \textit{Dépend de :}
+                \begin{itemize}
+                    \item \javacode{org.eventb.core.IMachineRoot}
+                    \item \javacode{org.eventb.core.IEvent}
+                \end{itemize}
+        \end{itemize}
+
+    \item [\javacode{public static}] \javacode{IAction addAction(IEvent event, final String name)}
+        \begin{itemize}[label={}]
+            \item Ajout d'une action à l'évènement donné.
+            \item \textit{Dépend de :}
+                \begin{itemize}
+                    \item \javacode{org.eventb.core.IEvent}
+                    \item \javacode{org.eventb.core.IAction}
+                \end{itemize}
+        \end{itemize}
+
+\end{labeling}
+
+Nous ne mentionnons pas la création d'éléments autres que les évènements et les actions, dans la mesure où l'opération sera la même.
+Par la suite, d'autres fonctionnalités viendront s'ajouter, notamment le déplacement et la suppression d'éléments.
+La gestion des raffinements et des contextes sera nécessaire sur le long terme, et à prendre en compte pour une suite à notre preuve de concept.
+
+
+\section{Défis de conception}
+
+La conception d'une surcouche à Rodin n'est pas une entreprise si simple qu'il n'y paraît.
+D'une part, l'abstraction des fonctionnalités nécessite une compréhension profonde de l'API, et une certaine rigueur vis-à-vis de la validation %
+des opérations effectuées.
+Par ailleurs, Rodin étant fondé sur Eclipse, il s'avère particulièrement difficile d'extraire son cœur.
+
+
+\subsection{Validation des opérations réalisées}
+
+
+\subsection{Extraction du cœur de Rodin}
+
+Au sein de l'API de Rodin, l'implémentation de la méthode Event-B, est contenue dans les packages préfixés par \javacode{org.eventb.}.
+La couche de gestion de projet et l'interface utilisateur, quant à elles, sont contenues dans les packages \javacode{org.rodinp.}.
+Nous appelons la première région le cœur de Rodin, et la seconde, la couche externe.
+
+La séparation entre ces deux régions est très floue.
+Notamment, comme nous l'avons vu en section \ref{sec:rodinApiSummaryEvent}, les classes implémentant les éléments Event-B sont définies dans le cœur de Rodin, %
+héritent de \javacode{EventBElement} qui appartient au cœur, mais étendent également \javacode{InternalElement} qui se situe dans la couche externe de l'API.
+L'enjeu de cette abstraction est donc avant tout d'isoler les opérations de manipulation de projets et d'éléments.
+
+Toutefois, la manipulation d'un projet Rodin implique une communication avec la base de données Rodin.
+Or, celle-ci ne peut être acquise qu'à travers un \textit{workspace}, typiquement de la manière suivante~:
+
+\begin{imtaCode}{java}
+final IWorkspace workspace = ResourcesPlugin.getWorkspace();
+final IRodinDB rodinDB = RodinCore.valueOf(workspace.getRoot());
+\end{imtaCode}
+
+Nous comprenons qu'un \textit{workspace} doit exister, et que le plugin \javacode{ResourcesPlugin} doit avoir été initialisé.
+L'obstacle qui se dessine est précisément la nécessité de l'existence d'une instance d'\javacode{IWorkspace}~: en effet, comme l'indique la documentation %
+de l'API d'Eclipse \cite{eclipseiworkspace}, cette interface n'a pas vocation à être étendue ni implémentée par les clients.
+Concrètement, cela signifie qu'un \textit{workspace} n'est \textit{a priori} pas censé exister hors d'une instance d'Eclipse.
+Ainsi, faire fonctionner le cœur de Rodin hors du mode plugin semble entravé par cette contrainte.
+
+La solution idéale consiste à déterminer et à implémenter une méthode d'instanciation dynamique d'un \textit{workspace} Eclipse.
+Cela permettrait de produire une bibliothèque de classes fermée et sans dépendances autres qu'à l'API de Rodin et à celle d'Eclipse.
+Une telle bibliothèque serait relativement simple à intégrer à OpenFlexo.
+Cette solution offrirait par effet de bord une preuve de concept de l'intégration d'une application RCP Eclipse à OpenFlexo.
+
+Une alternative consisterait à lancer effectivement une instance de Rodin dans laquelle s'exécuterait un plugin, qui communiquerait %
+en réseau, par exemple sur une socket Unix, avec l'instance d'OpenFlexo.
+Cette solution est moins satisfaisante, car elle n'intègre pas à proprement parler Rodin dans l'écosystème OpenFlexo, et car elle implique l'exécution %
+d'une instance d'Eclipse en plus d'OpenFlexo.
+Elle présente cependant le mérite de contourner l'obstacle, et demeure une solution acceptable dans l'optique de réaliser une preuve de concept.
+
+
+\section{Développement d'une bibliothèque indépendante d'Eclipse}
+
+Nous souhaitons implémenter la surcouche de Rodin en tant que bibliothèque de classes qui ne dépend pas d'une instance d'Eclipse en cours d'exécution.
+Comme Rodin est conçu en tant que plugin d'Eclipse, il nécessite une partie du cœur d'Eclipse, que nous devons initialiser nous-mêmes.
+
+\subsection{Approche naïve : extension de la classe \texttt{RodinDB}}
+
+Nous souhaitons tout d'abord déterminer s'il est possible ou non d'instancier manuellement la classe \javacode{RodinDB}, sans passer par le \textit{workspace}.
+Son constructeur est cependant qualifié de \javacode{protected}.
+Nous prenons alors l'initiative d'étendre cette classe, par la classe \javacode{MyRodinDB}.
+
+\begin{imtaCode}{java}
+public class MyRodinDB extends RodinDB {
+    public MyRodinDB() {
+        super();
+    }
+}
+\end{imtaCode}
+
+Cependant, lorsque nous instancions cette classe en mode non-plugin, l'erreur suivante est levée~:
+
+\begin{imtaConsole}
+Exception in thread "main" java.lang.IllegalStateException: Workspace is closed.
+	at org.eclipse.core.resources.ResourcesPlugin.getWorkspace(ResourcesPlugin.java:412)
+	at org.rodinp.internal.core.RodinDB.getRodinProject(RodinDB.java:226)
+	at Test.Main.createRodinProject(Main.java:18)
+	at Test.Main.main(Main.java:48)
+\end{imtaConsole}
+
+Cela confirme qu'un \textit{workspace} doit effectivement être ouvert.
+Nous nous attachons donc à trouver une méthode permettant de procéder à cette ouverture.
+
+
+\subsection{Ouverture du \textit{workspace}}
+
+Afin de pouvoir manipuler des projets Rodin et leurs éléments, il est primordial de disposer d'un \textit{workspace} ouvert.
+Il faut donc trouver dans la base de code d'Eclipse quelle classe implémente l'interface \javacode{IWorkspace}, et déterminer une manière de l'instancier.
+
+Une recherche du mot-clé \textit{workspace} dans le moteur de recherche GrepCode\footnote{%
+\url{http://grepcode.com/search?query=workspace&start=0&entity=type&n=}} %
+permet de trouver la classe \javacode{org.eclipse.core.internal.resources.Workspace}, et d'accéder à son code source \cite{eclipseworkspace}.
+Notons au passage que le package \javacode{org.eclipse.core.internal.resources} ne figure pas sur la vue globale des packages de l'API Eclipse \cite{eclipseapioverview}.
+Nous essayons donc d'instancier la classe \javacode{Workspace}, avec le code minimal suivant~:
+
+\begin{imtaCode}{java}
+import org.eclipse.core.internal.resources.Workspace;    
+
+public class Main {
+    public static void main(String[] args) {
+        Workspace workspace = new Workspace();
+    }
+}
+\end{imtaCode}
+
+L'exécution de cette classe conduit malheureusement à une exception \javacode{ExceptionInInitializerError}, avec la trace suivante :
+
+\begin{imtaConsole}
+Exception in thread "main" java.lang.ExceptionInInitializerError
+	at Test.Main.main(Main.java:6)
+Caused by: java.lang.NullPointerException
+	at org.eclipse.core.internal.runtime.InternalPlatform.getOS(InternalPlatform.java:395)
+	at org.eclipse.core.runtime.Platform.getOS(Platform.java:1126)
+	at org.eclipse.core.internal.resources.Workspace.<clinit>(Workspace.java:84)
+	... 1 more
+\end{imtaConsole}
+
+Cette trace nous informe qu'un appel à la méthode statique \javacode{Platform.getOS} a été effectué, mais à échoué lors d'un appel à la méthode d'instance %
+\javacode{InternalPlatform.getOS}.
+Nous souhaitons investiguer pour trouver la source de l'erreur \javacode{NullPointerException}.
+
+
+\subsubsection{Analyse du \textit{bytecode} de \texttt{Platform.getOS}}
+
+Ne disposant pas du code source de la classe \javacode{Platform}, nous pouvons malgré tout inspecter le bytecode associé.
+Nous trouvons ainsi la définition de la méthode \javacode{getOS}~:
+
+\begin{imtaCode}{java}
+// Method descriptor #264 ()Ljava/lang/String;
+// Stack: 1, Locals: 0
+public static java.lang.String getOS();
+  0  invokestatic org.eclipse.core.internal.runtime.InternalPlatform.getDefault() : org.eclipse.core.internal.runtime.InternalPlatform [398]
+  3  invokevirtual org.eclipse.core.internal.runtime.InternalPlatform.getOS() : java.lang.String [389]
+  6  areturn
+    Line numbers:
+      [pc: 0, line: 1126]
+\end{imtaCode}
+
+La documentation d'Oracle nous renseigne sur le sens des instructions \texttt{invokestatic} \cite{javainvokestatic} et \texttt{invokevirtual} \cite{javainvokevirtual}~: %
+la première correspond à l'appel d'une méthode statique, et la seconde à l'appel d'une méthode d'instance.
+Nous comprenons donc que la méthode \javacode{Platform.getOS} appelle en premier lieu la méthode statique \javacode{InternalPlatform.getDefault}, %
+puis appelle sur l'instance retournée la méthode \javacode{getOS}, et renvoie enfin l'instance de \javacode{String} retournée.
+Les appels étant naturellement chaînés façon Java, le code source ressemble probablement à ceci~:
+
+\begin{imtaCode}{java}
+public static String getOS() {
+    return InternalPlatform.getDefault().getOS();
+}
+\end{imtaCode}
+
+Si par ailleurs nous essayons d'invoquer la méthode \javacode{InternalPlatform.getDefault}, aucune erreur ne survient.
+L'erreur est donc levée à l'intérieur de l'appel à la méthode d'instance \javacode{InternalPlatform.getOS}, comme le laissait entendre la trace d'erreur.
+
+
+\subsubsection{Analyse du \textit{bytecode} de \texttt{InternalPlatform.getOS}}
+
+Nous nous intéressons maintenant à la méthode d'instance \javacode{InternalPlatform.getOS}, dont le bytecode est le suivant~:
+
+\begin{imtaCode}{java}
+// Method descriptor #572 ()Ljava/lang/String;
+// Stack: 2, Locals: 1
+public java.lang.String getOS();
+ 0  aload_0 [this]
+ 1  invokevirtual org.eclipse.core.internal.runtime.InternalPlatform.getBundleContext() : org.osgi.framework.BundleContext [897]
+ 4  ldc <String "osgi.os"> [18]
+ 6  invokeinterface org.osgi.framework.BundleContext.getProperty(java.lang.String) : java.lang.String [955] [nargs: 2]
+11  areturn
+  Line numbers:
+    [pc: 0, line: 395]
+  Local variable table:
+    [pc: 0, pc: 12] local: this index: 0 type: org.eclipse.core.internal.runtime.InternalPlatform
+\end{imtaCode}
+
+Comme l'indique la documentation d'Oracle, l'instruction \texttt{aload} \cite{javaaload} pousse une variable sur la pile de la JVM, et l'instruction %
+\texttt{ldc} \cite{javaldc} y pousse une valeur scalaire.
+Le code source de cette méthode est donc équivalent à celui qui suit~:
+
+\begin{imtaCode}{java}
+public String getOS() {
+    return this.getBundleContext().getProperty("osgi.os");
+}
+\end{imtaCode}
+
+Nous cherchons la source d'une \javacode{NullPointerException}.
+Or, nous savons que \javacode{this} ne pointe pas sur \javacode{null}.
+Nous testons donc l'appel \javacode{InternalPlatform.getDefault().getBundleContext()}, correspondant à l'invocation de la méthode d'instance %
+\javacode{InternalPlatform.getBundleContext}, et nous remarquons que la valeur retournée est \javacode{null}.
+L'erreur \javacode{NullPointerException} est donc levée par l'invocation de la méthode \javacode{BundleContext.getProperty} sur une référence nulle.
+
+En inspectant le code source de la classe \javacode{InternalPlatform}, nous découvrons que la méthode d'instance \javacode{getBundleContext} renvoie l'attribut \javacode{context}, %
+qui est initialisé par la méthode \javacode{start}.
+Comme cette dernière reçoit un \javacode{BundleContext} en argument, nous initialisons l'instance d'\javacode{InternalPlatform} de la façon suivante~:
+
+\begin{imtaCode}{java}
+// Initialisation du framework
+FrameworkFactory frameworkFactory = ServiceLoader.load(FrameworkFactory.class).iterator().next();
+Map<String, String> config = new HashMap<String, String>();
+Framework framework = frameworkFactory.newFramework(config);
+framework.start();
+
+// Démarrage de la plateforme
+BundleContext runtimeContext = framework.getBundleContext();
+InternalPlatform.getDefault().start(runtimeContext);
+
+// Instanciation du workspace
+Workspace workspace = new Workspace();
+\end{imtaCode}
+
+L'exécution de ce code ne produit plus la même exception, comme le montre la trace~:
+
+\begin{imtaConsole}
+Exception in thread "main" java.lang.NullPointerException
+	at org.eclipse.core.internal.resources.LocalMetaArea.<init>(LocalMetaArea.java:59)
+	at org.eclipse.core.internal.resources.Workspace.<init>(Workspace.java:286)
+	at test.Main.main(Main.java:207)
+\end{imtaConsole}
+
+Bien que l'instanciation du \textit{workspace} ne fonctionne toujours pas, l'initialisation de la plateforme ne lève plus d'erreur.
+Nous continuons donc notre rétro-ingénierie sur la classe \javacode{LocalMetaArea}, dont l'instanciation semble être à la source de l'erreur.
+
+
+\subsubsection{Analyse de la classe \texttt{LocalMetaArea}}
+
+Nous trouvons les sources de la classe \javacode{LocalMetaArea} sur GrepCode \footnote{%
+\url{http://grepcode.com/file/repository.grepcode.com/java/eclipse.org/4.4.1/org.eclipse.core/resources/3.9.1/org/eclipse/core/internal/resources/LocalMetaArea.java}}.
+En nous intéressant à son constructeur, nous lisons le code suivant~:
+
+\begin{imtaCode}{java}
+public LocalMetaArea() {
+    super();
+    metaAreaLocation = ResourcesPlugin.getPlugin().getStateLocation();
+    projectMetaLocation = metaAreaLocation.append(F_PROJECTS);
+}
+\end{imtaCode}
+
+En testant indépendamment l'acquisition du plugin de gestion des ressources Eclipse, nous constatons qu'il n'est pas initialisé~:
+
+\begin{imtaCode}{java}
+System.out.println(ResourcesPlugin.getPlugin());
+\end{imtaCode}
+\vspace{-0.5cm}
+\begin{imtaConsole}
+null
+\end{imtaConsole}
+
+Après de nombreux essais infructueux, il apparaît très lourd d'initialiser ce plugin sans passer par l'initialisation traditionnelle d'Eclipse.
+
+
+\subsection{Difficulté de la rétro-ingénierie~: vers une alternative}
+
+En creusant de plus en plus profondément le code source et le \textit{bytecode} de l'API d'Eclipse, nous ressentons la lourdeur que représente l'instanciation d'un \textit{workspace}.
+Cela est dû au fait que la classe \javacode{Workspace} est instanciée par Eclipse à l'initialisation.
+Ainsi, pour ouvrir manuellement un \textit{workspace}, il faut reproduire au moins partiellement les étapes d'initialisation d'Eclipse, ce qui est fatalement très lourd.
+Pour appuyer ce fait, la documentation de la classe \javacode{ResourcesPlugin} \cite{eclipseresourcesplugin} nous indique que le \textit{workspace} est censé être initialisé à travers la méthode %
+\javacode{ResourcesPlugin.getWorkspace}~:\\
+
+\begin{imtaQuote}
+A typical sequence of events would be for a dependent plug-in to call\\ResourcesPlugin.getWorkspace().
+Doing so would cause this plug-in to be activated and the workspace (if any) to be loaded from disk and initialized.
+\end{imtaQuote}
+
+Or, un appel à la méthode \javacode{getWorkspace} résulte en une erreur, tout comme un appel à la méthode \javacode{start}.
+Nous comprenons qu'il sera très complexe de mettre en œuvre une partie de l'API Eclipse sans lancer toute la machinerie.
+
+Afin de réaliser une preuve de concept de l'intégration de Rodin à OpenFlexo nous nous proposons d'implémenter une méthode alternative.
+Celle-ci ne sera pas idéale, puisqu'elle ne permettra pas d'isoler le cœur de Rodin et de l'intégrer à OpenFlexo en tant que Technology Adapter~; %
+Elle aura néanmoins le mérite de démontrer la faisabilité d'une telle intégration.
+
+
+\section{Une surcouche en mode plugin~: le projet \textit{BlangFlexo}}
+
+La solution que nous nous proposons de réaliser consiste à abstraire l'API de Rodin dans un fonctionnement en mode \textit{plugin}, et à faire communiquer une instance de Rodin %
+avec l'instance d'OpenFlexo
+Cette approche permet de s'affranchir des problèmes d'initialisation de \textit{workspace}, puisqu'Eclipse s'en charge alors à notre place.
+
+Nous créons un projet Eclipse de type \textit{plugin}, que nous nommons \textit{BlangFlexoPlugin}.
+Ce projet est composé de deux packages~: \javacode{org.blangflexo.core}, et \javacode{org.blangflexo.plugin}.
+Le premier se charge d'abstraire l'API de Rodin, et le second implémente l'écoute d'un canal de communication.
+Comme la conception et l'implémentation d'un plugin Eclipse est un sujet complexe, nous traiterons du développement du package \javacode{org.blangflexo.plugin} au chapitre suivant.
+
+\subsection{Le cœur de la surcouche~: \texttt{org.blangflexo.core}}
+
+Le cœur de notre plugin repose sur la classe \javacode{ApiAbstractor}.
+Celle-ci fournit l'abstraction désirée pour pouvoir exécuter des instructions venant de l'extérieur.
+Dans le cadre de notre preuve de concept, nous nous limitons aux fonctionnalités élémentaires, ainsi qu'à la manipulation de quelques éléments de projet Rodin.
+
+\subsubsection{Fonctionnalités de l'abstraction de l'API Rodin}
+
+L'interface publique de la classe \javacode{org.blangflexo.core.ApiAbstractor} est la suivante~:
+
+\begin{table}[H]
+    \centering
+    \renewcommand*{\arraystretch}{1.2}
+    \begin{tabular}{l l}
+        \hline
+        Qualificateurs et type & Méthode et description\\\hline\hline
+        \multirow{2}{*}{\javacode{public static void}} & \javacode{start()} \\ & Démarre la communication avec l'API de Rodin\\\\
+        \multirow{2}{*}{\javacode{public static boolean}} & \javacode{isStarted()} \\ & Indique si oui ou non la communication avec l'API de Rodin est établie\\\\
+        \multirow{2}{*}{\javacode{public static IRodinProject}} & \javacode{createRodinProject(String name)} \\ & Crée un projet dans le workspace courant avec le nom donné\\\\
+        \multirow{2}{*}{\javacode{public static IRodinFile}} & \javacode{createMachine(String projectName, String machineName)} \\ & Crée une machine avec le nom donné dans le projet spécifié\\\\
+        \multirow{2}{*}{\javacode{public static IEvent}} & \javacode{addEvent(String machineName, String eventName)} \\ & Ajoute un évènement à la machine donnée\\\\
+        \multirow{2}{*}{\javacode{public static IAction}} & \javacode{addAction(String eventName, String actionName)} \\ & Ajoute une action à l'évènement donné\\\\
+        \multirow{2}{*}{\javacode{public static IGuard}} & \javacode{addGuard(String eventName, String guardName)} \\ & Ajoute une garde à l'évènement donné\\\\
+        \multirow{2}{*}{\javacode{public static IVariable}} & \javacode{addVariable(String machineName, String variableName)} \\ & Ajoute une variable à la machine donnée\\\\
+        \hline
+    \end{tabular}
+    \caption{Interface de la classe \texttt{ApiAbstractor}}
+    \label{tab:apiAbstractor}
+\end{table}
+
+Ces méthodes permettent de construire un projet Rodin, en lui ajoutant des éléments.
+L'idée de cette interface est de ne manipuler que des chaînes de caractères, afin de faciliter la communication à venir.
+Ainsi, l'ajout de la variable \(xx\) à la machine \(Mac\) peut se sérialiser en un ordre tel que \texttt{addvar, Mac, xx}.
+
+L'implémentation des méthodes \javacode{createRodinProject} et \javacode{createMachine}, ainsi que de la méthode privée \javacode{createRodinElement}, est largement inspirée de celle que %
+propose le wiki de Rodin \cite{rodinwikicreateprojects}.
+Nous avons tout de même adapté le code à nos besoins, en supprimant notamment des opérations certes utiles dans une implémentation complète, mais superflues dans notre contexte.
+
+
+\subsubsection{Fonctionnement interne de l'abstraction}
+
+\paragraph{Gestion de l'environnement du projet}
+
+La classe \javacode{ApiAbstractor} possède une table de hachage en membre statique, qui conserve l'environnement actuel.
+Cet evironnement correspond à l'ensemble des éléments instanciés au cours du cycle de vie du plugin.
+Chaque élément est enregistré sous la forme d'un couple clé-valeur, dont la clé est un couple formé du type et du nom de l'élément, et dont la valeur est l'instance de l'élément.
+Cette structure se traduit par la variable statique \javacode{environment} dans la classe \javacode{ApiAbstractor}, dépendant d'une classe \javacode{Pair} que nous définissons pour pallier %
+l'absence de tuples en Java.
+
+L'extrait suivant de la classe \javacode{ApiAbstractor} présente la gestion de l'environnement, à travers les opérations d'insertion et de recherche.
+
+\begin{imtaCode}{java}
+public class ApiAbstractor {
+    private static HashMap<Pair<Class, String>, Object> environment = null;
+
+    private static void insertIntoEnvironment(Object element, String name) {
+        Pair<Class, String> key = new Pair(element.getClass(), name);
+        environment.put(key, element);
+    }
+
+    private static Object lookupEnvironment(Class type, String name) {
+        Pair<Class, String> key = new Pair(type, name);
+
+        Object result = null;
+        for (Pair itKey : environment.keySet()) {
+            if (itKey.equals(key)) {
+                result = environment.get(itKey);
+                break;
+            }
+        }
+
+        return result;
+    }
+}
+\end{imtaCode}
+
+Si la classe \javacode{Pair} représentant les couples est relativement simple, elle utilise cependant des types génériques, et surcharge la méthode \javacode{equals} héritée %
+d'\javacode{Object} pour faciliter sa manipulation.
+Sa définition est la suivante~:
+
+\begin{imtaCode}{java}
+public class Pair<T, U> {
+    public final T first;
+    public final U second;
+
+    public Pair(T first, U second) {
+        this.first = first;
+        this.second = second;
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        Pair<T, U> otherPair;
+        try {
+            otherPair = (Pair<T, U>) other;
+        } catch (ClassCastException ex) {
+            System.out.println("Could not cast other into Pair");
+            return false;
+        }
+        return (otherPair.first.equals(first) && otherPair.second.equals(second));
+    }
+}
+\end{imtaCode}
+
+
+\paragraph{Création générique d'éléments de machine}
+
+Les méthodes d'ajout d'éléments reposent sur une méthode privée \javacode{createRodinElement}, qui instancie un élément générique.
+Cette méthode, inspirée par le wiki de Rodin \cite{rodinwikicreateprojects}, est définie ainsi~:
+
+\begin{imtaCode}{java}
+public static IInternalElement createRodinElement(
+            final IInternalElementType type,
+            final String name,
+            final IInternalElement parent)
+    throws ApiAbstractorException
+    {
+        if (parent == null)
+            return null;
+
+        try {
+            final IInternalElement rodinEl = parent.getInternalElement(type, name);
+            rodinEl.create(null, null);
+            if (rodinEl instanceof ILabeledElement)
+                ((ILabeledElement) rodinEl).setLabel(name, null);
+
+            if (rodinEl instanceof IIdentifierElement)
+                ((IIdentifierElement) rodinEl).setIdentifierString(name, null);
+
+            if (rodinEl instanceof IRefinesEvent)
+                ((IRefinesEvent) rodinEl).setAbstractEventLabel(name, null);
+
+            return rodinEl;
+
+    } catch (final Exception ex) {
+        // fail est une méthode renvoyant une ApiAbstractException, permettant de
+        // simplifier la levée d'exceptions
+        throw fail("Could not create event", ex);
+    }
+}
+\end{imtaCode}
+
+Cette méthode est donc utilisée par les méthodes créatrices d'éléments de projet, à la manière d'\javacode{addAction}~:
+
+\begin{imtaCode}{java}
+public static IAction addAction(String eventName, String actionName) 
+    throws ApiAbstractorException 
+    {
+    Event event = (Event) lookupEnvironment(Event.class, eventName);
+    if (event == null)
+        throw new ApiAbstractorException("Event '" + eventName + "' not found");
+
+    Action action = (Action) createRodinElement(
+                                IAction.ELEMENT_TYPE, actionName, event);
+    insertIntoEnvironment(action, actionName);
+    return action;
+}
+\end{imtaCode}
+
+
+\paragraph{Typage des éléments de projet}
+
+Comme le laissent suggérer la structure de l'environnement interne et la méthode de recherche dans celui-ci, le type des éléments est contraint.
+En effet, même si l'interaction avec l'API abstraite ne s'opère qu'à travers des chaînes de caractères, l'implémentation garantit que les règles de hiérarchie de la méthode B seront respectées.
+Ainsi, une garde ne pourra typiquement être attachée qu'à un évènement, tout comme une variable sera toujours rattachée directement à une machine.
+
+
+\section*{Vers une communication avec OpenFlexo}
+
+Nous disposons maintenant d'une abstraction de l'API de Rodin.
+Bien que la surcouche que nous proposons soit partielle, elle répond amplement aux besoins de notre preuve de concept.
+Nous nous proposons maintenant de présenter la partie plugin du projet \textit{BlangFlexo}, et de faire un pas vers la communication avec OpenFlexo.

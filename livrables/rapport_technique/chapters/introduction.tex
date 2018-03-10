@@ -1,0 +1,55 @@
+\chapter*{Présentation du projet}
+\label{sec:introduction}
+\addcontentsline{toc}{chapter}{\nameref{sec:introduction}}
+
+\section*{Contexte}
+\label{sec:contexte}
+\addcontentsline{toc}{section}{\nameref{sec:contexte}}
+
+Ce projet s'inscrit dans le cadre du projet Formose, dont l'objectif est de concevoir une méthode formelle pour l'ingénierie %
+des exigences, soutenue par un écosystème open-source.
+Le projet Formose s'attache à créer un lien entre l'univers de l'ingénierie des exigences, lié par essence au langage naturel, %
+et celui de la preuve formelle, reposant sur un formalisme mathématique strict.
+Afin de connecter ces deux univers, le projet Formose fait appel à OpenFlexo, une infrastructure logicielle open-source, permettant de fédérer les modèles.
+OpenFlexo permet en l'occurrence de bâtir un pont entre l'ingénierie des exigences et la preuve formelle.
+
+Dans le cadre du projet Formose, le client se repose sur la méthode B, et sa version évènementielle, Event-B, pour la rédaction de preuves formelles.
+Cependant, le projet Formose se place dans le réferentiel de l'ingénierie des exigences, et il manque à ces méthodes des constructions et des expressions %
+pour traduire plus naturellement les spécifications liées à ce réferentiel.
+Le client souhaite ainsi développer une nouvelle méthode formelle, dérivée comme Event-B de la méthode B, mais pilotée par la spécification de buts, afin de mieux correspondre %
+à l'ingénierie des exigences.
+L'idée est donc de modifier la méthode B, dont la philosophie convient déjà au projet, et de lui apporter l'expressivité dont le projet Formose a besoin.
+Dans cette optique, le client a déjà modélisé les nouvelles obligations de preuve, et souhaite dorénavant une implémentation de cette nouvelle méthode dans l'assistant logiciel qu'il utilise.
+
+
+\section*{Choix de la réalisation et objectifs}
+\label{sec:objectifs}
+\addcontentsline{toc}{section}{\nameref{sec:objectifs}}
+
+Ce projet comporte une dimension très exploratoire, et laisse une grande liberté dans le choix de la réalisation.
+Par ailleurs, le client a finalisé l'implémentation du métamodèle de la méthode Event-B dans OpenFlexo.
+Il incombe donc à notre projet de déterminer d'une part l'outil de méthode B que nous souhaitons intégrer dans OpenFlexo, et d'autre part l'approche à adopter pour procéder à cette intégration.
+La contribution finale de ce projet consiste en une preuve de concept de cette intégration.
+
+Le choix de l'environnement de méthode B avec lequel travailler est relativement immédiat.
+En effet, bien que l'outil privilégié par le client soit Atelier B, l'assistant officiel de la méthode B, celui-ci est propriétaire, et la majeure partie de son code source est fermée.
+Dans l'optique de réaliser une preuve de concept, nous avons décidé de travailler avec Rodin, en ayant pour perspective future l'intégration d'Atelier B à OpenFlexo.
+
+L'approche à adopter pour réaliser cette intégration est difficile à déterminer en amont du projet.
+La faisabilité des solutions que nous pouvons envisager \textit{a priori} ne peut se dessiner qu'à la suite d'une étude de l'API de Rodin.
+Nous pouvons cependant d'ores et déjà considérer deux familles de solutions~:
+
+\begin{itemize}
+    \item Isolation du cœur de Rodin et intégration dans OpenFlexo
+    \item Communication entre une instance de Rodin et OpenFlexo
+\end{itemize}
+
+Dans un cas comme dans l'autre, nous aurons besoin de développer un \textit{Technology Adapter} OpenFlexo afin de réaliser effectivement l'intégration.
+\newline
+
+Les objectifs de ce projet, auquel le présent document s'attache à répondre, sont donc~:
+
+\begin{itemize}
+    \item L'asbtraction de l'API de Rodin pour préparer son intégration dans OpenFlexo~;
+    \item La réalisation d'un \textit{Technology Adapter} pour concrétiser cette intégration.
+\end{itemize}

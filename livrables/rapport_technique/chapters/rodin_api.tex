@@ -1,0 +1,183 @@
+\chapter{Étude de l'API Rodin}
+
+\section{Implémentation des éléments de systèmes et de projets}
+
+\subsection{Éléments de machines Event-B}
+
+L'API de Rodin définit, dans les packages préfixés par \javacode{org.eventb.}, les éléments relatifs à la description de systèmes %
+avec la méthode Event-B.
+Elle définit d'une part les protocoles de ces éléments sous la forme d'interfaces, et leur implémentation en tant que classes.
+Dans cette section, nous présentons d'abord les protocoles implémentés par les éléments de la méthode Event-B, puis les classes qui leur font écho.
+
+\subsubsection{Protocoles}
+
+L'API de Rodin définit, dans le package \javacode{org.eventb.core}, les protocoles que chacun des types d'éléments %
+d'une machine B doit respecter.
+Comme le cœur de Rodin est écrit en Java, il est naturel que ces protocoles soient des interfaces.
+Nous avons donc, pour chaque type d'élément Event-B, le contrat à respecter, représenté par une interface.
+Nous retrouvons ainsi les interfaces \javacode{IAction}, \javacode{IEvent}, \javacode{IInvariant}...
+Nous nous proposons de présenter, à titre d'exemple mais aussi pour approfondir notre compréhension de l'API, l'interface \javacode{IEvent}.
+
+\paragraph{Un exemple : \texttt{IEvent}}
+
+L'interface \javacode{IEvent} présente principalement des accesseurs, permettant d'accéder aux sous-éléments d'un évènement Event-B.
+Ces éléments sont les suivants~:
+
+\begin{itemize}
+    \item Les actions \javacode{IAction};
+    \item Les gardes, implémentant \javacode{IGuard};
+    \item Les variables locales, implémentant \javacode{IVariable};
+    \item Les clauses de raffinement, implémentant \javacode{IRefinesEvent};
+    \item Les témoins, implémentant \javacode{IWitness};
+\end{itemize}
+
+L'interface \javacode{IEvent} impose donc l'existence d'accesseurs à ces sous-éléments.
+Ces accesseurs sont de deux types : nommé, et exhaustif.
+
+Les accesseurs nommés permettent d'accéder à un sous-élément par son nom.
+Ainsi, la méthode \javacode{getGuard} prend un \javacode{String} en argument, et renvoie une instance de \javacode{IGuard}, portant le nom spécifié.
+Cette instance peut ne pas exister dans l'instance d'\javacode{IEvent}.
+Cela signifie que la méthode \javacode{getGuard} renvoie systématiquement une garde portant le nom demandé, mais que celle-ci %
+peut ne pas être attachée à l'évènement concerné.
+
+Les accesseurs exhaustifs, quant à eux, renvoient la liste des sous-éléments de l'élément concernés.
+Ainsi, la méthode \javacode{getActions} ne prend aucun argument, et renvoie un tableau de type \javacode{IActions[]}, dont nous savons que tous %
+les éléments sont effectivement rattachés à l'évènement.
+
+L'interface \javacode{IEvent} présente finalement les accesseurs suivants~:
+
+\begin{itemize}
+    \item \javacode{IAction getAction(String name)} et \javacode{IAction[] getActions()}
+    \item \javacode{IGuard getGuard(String name)} et \javacode{IGuard[] getGuards()}
+    \item \javacode{IParameter getParameter(String name)} et \javacode{IParameter[] getParameters()}
+    \item \javacode{IRefinesEvent getRefinesClause(String name)} et \javacode{IRefinesEvent[] getRefinesClauses()}
+    \item \javacode{IWitness getWitness(String name)} et \javacode{IWitness[] getWitnesses()}
+\end{itemize}
+
+Nous notons que les variables locales se retrouvent sous le nom de \javacode{Parameter}.
+
+\paragraph{Généralisation avec \texttt{IInternalElement}}
+
+Les protocoles d'élément Event-B dérivent de la super-interface \javacode{IInternalElement}.
+Cette interface permet entre autres de manipuler plus génériquement les sous-éléments des éléments Event-B.
+Ainsi, les accesseurs nommés spécialisés tels que \javacode{getAction(String name)} ou \javacode{getInvariant(String name)} sont généralisés par %
+la méthode \javacode{getInternalElement}, qui prend en paramètres le type de l'élément auquel accéder, et son nom.
+Le type est défini comme une instance de l'interface \javacode{IInternalElementType<T extends IInternalElement>}, %
+% ce qui permet de travailler avec des éléments de type indéterminé, en lui passant une instance de \javacode{IInternalElementType<IInternalElement>}.
+sachant que les interfaces d'élément Event-B définissent chacune leur type à travers une variable statique \javacode{ELEMENT_TYPE}, instance de %
+\javacode{IInternalElementType<T>} où \javacode{T} est l'interface elle-même.
+
+
+\subsubsection{Implémentation}
+
+L'implémentation des éléments Event-B et des interfaces du packages \javacode{org.eventb.core} est réalisée par les classes contenues dans %
+le package \javacode{org.eventb.core.basis}.
+Ainsi, chaque protocole défini dans le package \javacode{org.eventb.core} trouve sa réalisation, comme \javacode{IAction} implémentée par %
+\javacode{Action}, ou encore \javacode{IGuard} implémentée par \javacode{Guard}.
+
+Les implémentations de ces interfaces ne sont toutefois pas destinées à être utilisées telles quelles.
+La documentation suggère en effet aux clients de l'API de ne manipuler que des instances des interfaces, ou bien à étendre les implémentations.
+En reprenant l'exemple de l'élément \javacode{Event}, cela revient à ne travailler qu'avec des \javacode{IEvent}, ou alors à créer une classe fille de \javacode{Event}
+
+
+\subsection{Éléments de projet Rodin}
+
+L'API de Rodin fournit une surcouche aux éléments Event-B pour les manipuler en tant qu'éléments d'un projet Rodin, c'est-à-dire d'un type de projet Eclipse.
+Les interfaces et classes auxquelles nous nous intéresseons sont ainsi définies dans le package \javacode{org.rodinp.core}.
+
+\subsubsection{La base de données Rodin}
+
+Nous nous proposons tout d'abord de présenter le cœur de Rodin : la base de données Rodin.
+Implémentée par la classe \javacode{RodinDB}, celle-ci est chargée de conserver en mémoire les éléments de projets créés.
+Toute manipulation d'élément de projet Rodin entraîne une écriture dans la base de données.
+Par ailleurs, cette classe implémente un singleton, en lançant une exception de type \javacode{java.lang.Error} si son constructeur est appelée deux fois.
+
+La classe \javacode{RodinDB} propose différentes méthodes de manipulation de projet, notamment \javacode{getWorkspace} et \javacode{getRodinProject}.
+Elle est par ailleurs gérée par la classe \javacode{RodinDBManager}, qui la rend disponible à travers sa méthode \javacode{getRodinDB}.
+
+
+\subsubsection{Protocole}
+
+Le package \javacode{org.rodinp.core} définit tout d'abord le protocole des élément de projet Rodin, à travers l'interface \javacode{IRodinElement}.
+Cette interface permet notamment d'interagir avec la base de données Rodin, avec la méthode \javacode{exists}, vérifiant si l'élément existe dans la base.
+Elle permet également d'observer la hiérarchie d'éléments, à travers les méthodes \javacode{getAncestor} et \javacode{getParent}.
+
+Par ailleurs, l'interface \javacode{IRodinElement} fournit également des méthodes de manipulation générique des éléments, telles que \javacode{getElementName} et %
+\javacode{getElementType}.
+
+
+\subsubsection{Implémentation}\label{sec:rodinProjectElementProtocol}
+
+L'implémentation des éléments de projet Rodin et de l'interface \javacode{IRodinElement} est réalisée par la classe \javacode{RodinElement}.
+
+En plus des principales méthodes que nous avons évoquées en section \ref{sec:rodinProjectElementProtocol}, la classe \javacode{RodinElement} fournit %
+des accesseurs supplémentaires, dont \javacode{getChildren} et \javacode{getChildrenOfType}, renvoyant chacun une séquence d'éléments fils de l'élément courant.
+
+
+\subsection{Résumé : l'exemple de la classe \texttt{Event}}\label{sec:rodinApiSummaryEvent}
+
+Nous résumons dans cette section les fonctionnalités d'une classe implémentant un élément Event-B.
+Pour rester dans la même continuité, nous nous intéressons à l'implémentation d'un évènement, à travers la classe \javacode{Event}.
+Nous présentons donc les méthodes qu'elle met à notre disposition, ainsi que les classes et interfaces dont elle les tient.
+
+La figure suivante présente l'arbre d'héritage de la classe \javacode{Event}, annoté des interfaces implémentées par chacune des classes.
+
+\begin{figure}[H]
+\centering
+\begin{imtaConsole}
+java.lang.Object
+│
+└── org.eclipse.core.runtime.PlatformObject
+    │
+    └── org.rodinp.core.basis.RodinElement              -> IRodinElement
+        │
+        └── org.rodinp.core.basis.InternalElement       -> IInternalElement, IParent,
+            │                                              IElementManipulation
+            └── org.eventb.core.basis.EventBElement
+                │
+                └── org.eventb.core.basis.Event         -> IEvent
+\end{imtaConsole}
+\caption{Arbre d'héritage annoté de la classe \texttt{Event}}
+\label{fig:inheritanceTreeEvent}
+\end{figure}
+
+Soit une instance de la classe \javacode{Event}, que nous nommons \javacode{event}.
+
+À travers l'interface \javacode{IEvent}, nous pouvons utiliser les méthodes \javacode{event.getActions}, \javacode{event.getGuards}, \javacode{event.getParameters}, %
+\javacode{event.getRefinesClauses}, et \javacode{event.getWitnesses}, ainsi que leurs pendants nommés, pour accéder respectivement aux actions, aux gardes, aux variables locales, %
+aux clauses de raffinement, et aux témoins de l'évènement \javacode{event}.
+
+Les méthodes héritées de \javacode{EventBElement} permettent de manipuler \javacode{event} comme un élément de projet Event-B.
+Nous pouvons ainsi décider qu'\javacode{event} est un théorème avec \javacode{event.setTheorem}, obtenir le commentaire qui lui est associé avec \javacode{event.getComment}, %
+et obtenir son nom et son expression \textit{via} les méthodes \javacode{event.getIdentifierString} et \javacode{event.getExpressionString}.
+
+L'interface \javacode{IInternalElement} rapproche \javacode{event} de Rodin, en lui ajoutant des méthodes agissant sur la base de données Rodin.
+Ainsi, nous pouvons forcer la création d'\javacode{event} dans cette dernière avec \javacode{event.create}, et lui attribuer un fils avec \javacode{event.createChild}.
+Nous pouvons également comparer \javacode{event} à un autre élément, avec \javacode{event.hasSameAttributes}, ou encore \javacode{event.hasSameChildren}.
+Nous pouvons par ailleurs interagir avec l'environnement de travail, et notamment récupérer le fichier courant avec \javacode{event.getRodinFile}.
+
+
+\section{Gestion de projets}
+
+\subsection{Les projets Event-B et l'interface \texttt{IEventBProject}}
+
+Les projets Event-B sont gérés à travers la classe \javacode{EventBProject} du package \javacode{org.eventb.internal.core}.
+Cette classe implémente l'interface \javacode{IEventBProject}, qui prévoit des accesseurs sur les fichiers primordiaux d'un projet Event-B.
+
+Nous retrouvons ainsi \javacode{getContextFile} et \javacode{getMachineFile} pour manipuler respectivement les fichiers de contextes et de machines.
+Pour obtenir la racine de ces entités, l'interface propose également les méthodes \javacode{getContextRoot} et \javacode{getMachineRoot}.
+
+Cette interface fournit également un accesseur pour les fichiers de preuves, d'obligations de preuve, et de statut de preuve : respectivement, %
+\javacode{getPRFile}, \javacode{getPOFile}, et \javacode{getPSFile}.
+Nous retrouvons également les méthodes permettant d'accéder à la racine de ces entités.
+
+Par ailleurs, nous remarquons un accesseur particulier, \javacode{getRodinProject}.
+Cette méthode renvoie le projet Rodin sous-jacent au projet Event-B, qui est gardé comme attribut privé \javacode{rodinProject} dans l'implémentation \javacode{EventBProject}.
+Nous nous intéressons donc à l'interface \javacode{IRodinProject}.
+
+
+\subsection{Les projets Rodin et l'interface \texttt{IRodinProject}}
+
+% TODO
+Interface \javacode{IRodinProject}
+Classe \javacode{RodinProject}: attribut \javacode{IProject project}
