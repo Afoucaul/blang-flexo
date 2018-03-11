@@ -444,6 +444,14 @@ public class Pair<T, U> {
 }
 \end{imtaCode}
 
+\subparagraph*{Critique de l'environnement}
+La structure de données que nous avons choisie pour représenter l'environnement courant a le mérite d'être simple, et de suffire à notre démonstration.
+Cependant, elle présente un inconvénient majeur qui n'est pas acceptable pour une solution définitive~: elle n'a pas conscience des modifications qui sortent de son cadre.
+Ainsi, si le \textit{workspace} Rodin comporte un projet qui n'a pas été créé à travers cette surcouche, il est impossible de le manipuler.
+De même, si nous créons un évènement à travers notre surcouche et que nous le renommons \textit{via} l'interface graphique de Rodin, il deviendra invisible à notre surcouche.
+
+La solution à ce problème consiste à remplacer cet environnement qui fait office de \javacode{RodinDB} simplifiée par un lien avec la \javacode{RodinDB} réelle.
+
 
 \paragraph{Création générique d'éléments de machine}
 
