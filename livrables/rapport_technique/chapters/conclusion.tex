@@ -7,7 +7,26 @@
 \label{sec:validation}
 \addcontentsline{toc}{section}{\nameref{sec:validation}}
 
+Nous sommes parvenus à concevoir et à développer une abstraction minimaliste et opérationnelle de l'API de Rodin.
+Nous avons par la suite réussi à faire communiquer Rodin avec une application extérieure, afin de faire exécuter des instructions à l'éditeur.
+Nous avons pu démontrer le concept de cette communication, en jouant un scénario présentant diverses opérations constructives de manipulation de projet Rodin.
+Bien que la communication avec Rodin ne soit pas encore implémentée du côté d'OpenFlexo, le principe de l'interaction a pu être validé.
+
+Notons par ailleurs que le principe de la communication par TCP entre Rodin et OpenFlexo peut être étendu à n'importe quelle autre application Eclipse RCP.
+Ainsi, la base de communication que nous avons conçue pourra être réemployée pour intégrer une autre application fondée sur Eclipse à OpenFlexo.
+
 
 \section*{Perspectives d'amélioration}
 \label{sec:perspectives}
 \addcontentsline{toc}{section}{\nameref{sec:perspectives}}
+
+Pour conclure cette preuve de concept, il reste à concevoir et à implémenter la communication du côté d'OpenFlexo.
+Cela pourra se présenter sous la forme d'un \textit{Technology Adapter}, une bibliothèque de classes Java visant à créer un lien entre OpenFlexo et un modèle.
+Il faudra prendre garde à l'unification des commandes, et éventuellement réfléchir à un protocole de communication, afin que Rodin et OpenFlexo se comprennent.
+
+Par ailleurs, certains points de cette preuve de concept restent améliorables.
+En premier lieu, l'environnement artificiel que nous utilisons pour manipuler les projets dans le cadre du plugin devrait être remplacé par un lien avec la base de données Rodin.
+De plus, l'exécution des instructions s'effectue sur le même thread que la réception de messages.
+Il faudra étudier le flux d'instructions potentiel venant d'OpenFlexo, pour décider s'il est nécessaire de séparer la réception et l'exécution comme il est traditionnellement fait.
+Enfin, le langage d'instructions est encore pauvre, et il faudra l'enrichir afin notamment de permettre la modification d'éléments existants, et la prise en charge d'éléments créés hors %
+du plugin.
