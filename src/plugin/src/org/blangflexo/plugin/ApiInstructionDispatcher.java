@@ -5,13 +5,14 @@ import java.util.Arrays;
 import org.blangflexo.core.ApiAbstractor;
 import org.blangflexo.core.ApiAbstractorException;
 
-public class ApiOperationDispatcher {
+public class ApiInstructionDispatcher {
 	private static enum Operation {
 		CREATE_PROJECT,
 		CREATE_MACHINE,
 		ADD_EVENT,
 		ADD_ACTION,
-		ADD_GUARD;
+		ADD_GUARD,
+		ADD_VARIABLE;
 		
 		public static Operation fromInt(int value) {
 			switch (value) {
@@ -25,6 +26,8 @@ public class ApiOperationDispatcher {
 				return ADD_ACTION;
 			case 5:
 				return ADD_GUARD;
+			case 6:
+				return ADD_VARIABLE;
 					
 				default:
 					return null;
@@ -40,7 +43,7 @@ public class ApiOperationDispatcher {
 			
 			boolean result = false;
 			try {
-				result = dispatchOperation(operation, args);
+				result = dispatchInstruction(operation, args);
 			} catch (ApiAbstractorException ex) {
 				result = false;
 			}
@@ -59,7 +62,7 @@ public class ApiOperationDispatcher {
 	 * @return true if success, false else
 	 * @throws ApiAbstractorException
 	 */
-	public static boolean dispatchOperation(Operation operation, String[] args) throws ApiAbstractorException {
+	public static boolean dispatchInstruction(Operation operation, String[] args) throws ApiAbstractorException {
 		Object result = null;
 		switch (operation) {
 			case CREATE_PROJECT:
@@ -80,6 +83,13 @@ public class ApiOperationDispatcher {
 				
 			case ADD_GUARD:
 				result = ApiAbstractor.addGuard(args[0], args[1]);
+				break;
+				
+			case ADD_VARIABLE:
+				result = ApiAbstractor.addVariable(args[0], args[1]);
+				break;
+				
+			default:
 				break;
 		}
 		

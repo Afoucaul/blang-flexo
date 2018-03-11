@@ -7,17 +7,15 @@ import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-import org.blangflexo.core.ApiAbstractorException;
-
-public class OperationListener extends Thread {
+public class InstructionListener extends Thread {
 	private int port;
 	
-	public OperationListener(int port) {
+	public InstructionListener(int port) {
 		super();
 		this.port = port;
 	}
 	
-	@Override
+	//@Override
 	public void run() {
 		String instruction;
 		String response;
@@ -46,7 +44,7 @@ public class OperationListener extends Thread {
 			while (true) {
 				instruction = inFromClient.readLine();
 				System.out.println("Received: " + instruction);
-				boolean success = ApiOperationDispatcher.execute(instruction);
+				boolean success = ApiInstructionDispatcher.execute(instruction);
 				response = success ? "Success" : "Failure";
 				outToClient.writeBytes(response);
 			}
