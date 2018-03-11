@@ -195,7 +195,7 @@ public void listProjectElements(String projectName)
 
 Nous ajoutons un appel à cette méthode dans la méthode principale \imtaInlinecode{java}{SampleHandler.execute}, sur un projet Rodin nommé \imtaInlinecode{java}{"TestProject"}, %
 que nous créons et remplissons d'éléments de test, comme en figure \ref{fig:rodinTestProject}.
-Enfin, dans la console de l'instance de développement d'Eclipse, nous lisons les éléments listés comme montré en figure \ref{fig:rodinPluginConsole}.
+Enfin, dans la console de l'instance de développement d'Eclipse, nous lisons les éléments listés comme le montre la figure \ref{fig:rodinPluginConsole}.
 
 \begin{figure}[H]
     \centering
@@ -306,7 +306,7 @@ Ainsi, le message \texttt{1;NewProject} indique à Rodin de créer le projet \te
 \subsection{Exécution des instructions}\label{sec:instructionexecution}
 
 Les messages reçus par le serveur sont transmis à la classe \javacode{ApiInstructionDispatcher}, qui se charge de les interpréter en tant qu'instructions, et de les exécuter.
-La classe \javacode{ApiInstructionDispatcher} possède pour point d'entrée la méthode statique \javacode{execute}, prenant en argument une instruction sous la forme d'une chaîne de caractère.
+La classe \javacode{ApiInstructionDispatcher} possède pour point d'entrée la méthode statique \javacode{execute}, prenant en argument une instruction sous la forme d'une chaîne de caractères.
 L'instruction reçue est donc décodée, en suivant le format de messages expliqué plus tôt.
 Puis, en fonction de l'opération indiquée par le message, la fonction correspondante de la classe \javacode{ApiAbstractor} est invoquée.
 

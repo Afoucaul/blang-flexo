@@ -73,6 +73,13 @@ Par ailleurs, Rodin étant fondé sur Eclipse, il s'avère particulièrement dif
 
 \subsection{Validation des opérations réalisées}
 
+Lorsque nous procédons à la création d'un élément dans un projet Rodin, il est nécessaire de s'assurer que celui-ci a été effectivement créé.
+Une solution définitive devra donc intégrer ce que l'on appellerait en ingénierie des systèmes industriels une boucle de rétroaction.
+Pour ce faire, il faut d'abord déterminer de quelles informations nous avons besoin pour confirmer la création d'un élément.
+Il faut ensuite trouver les méthodes de l'API qui permettent d'accéder à ces informations.
+
+Nous faisons pour le moment abstraction de cette problématique, mais il sera nécessaire d'y trouver une réponse pour une solution définitive.
+
 
 \subsection{Extraction du cœur de Rodin}
 
@@ -177,7 +184,7 @@ Caused by: java.lang.NullPointerException
 	... 1 more
 \end{imtaConsole}
 
-Cette trace nous informe qu'un appel à la méthode statique \javacode{Platform.getOS} a été effectué, mais à échoué lors d'un appel à la méthode d'instance %
+Cette trace nous informe qu'un appel à la méthode statique \javacode{Platform.getOS} a été effectué, mais a échoué lors d'un appel à la méthode d'instance %
 \javacode{InternalPlatform.getOS}.
 Nous souhaitons investiguer pour trouver la source de l'erreur \javacode{NullPointerException}.
 
@@ -325,8 +332,8 @@ Or, un appel à la méthode \javacode{getWorkspace} résulte en une erreur, tout
 Nous comprenons qu'il sera très complexe de mettre en œuvre une partie de l'API Eclipse sans lancer toute la machinerie.
 
 Afin de réaliser une preuve de concept de l'intégration de Rodin à OpenFlexo nous nous proposons d'implémenter une méthode alternative.
-Celle-ci ne sera pas idéale, puisqu'elle ne permettra pas d'isoler le cœur de Rodin et de l'intégrer à OpenFlexo en tant que Technology Adapter~; %
-Elle aura néanmoins le mérite de démontrer la faisabilité d'une telle intégration.
+Celle-ci ne sera pas idéale, puisqu'elle ne permettra pas d'isoler le cœur de Rodin et de l'intégrer à OpenFlexo en tant que telle~; %
+elle aura néanmoins le mérite de démontrer la faisabilité d'une telle intégration.
 
 
 \section{Une surcouche en mode plugin~: le projet \textit{BlangFlexo}}
