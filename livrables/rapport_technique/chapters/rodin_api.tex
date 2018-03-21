@@ -58,9 +58,9 @@ Nous notons que les variables locales se retrouvent sous le nom de \javacode{Par
 
 \paragraph{Généralisation avec \texttt{IInternalElement}}
 
-Les protocoles d'élément Event-B dérivent de la super-interface \javacode{IInternalElement}.
+Les protocoles d'élément Event-B dérivent tous de la super-interface \javacode{IInternalElement}.
 Cette interface permet entre autres de manipuler plus génériquement les sous-éléments des éléments Event-B.
-Ainsi, les accesseurs nommés spécialisés tels que \javacode{getAction(String name)} ou \javacode{getInvariant(String name)} sont généralisés par %
+Ainsi, les accesseurs nommés spécialisés de chaque interface tels que \javacode{IEvent.getAction(String name)} ou \javacode{IMachineRoot.getInvariant(String name)} sont généralisés par %
 la méthode \javacode{getInternalElement}, qui prend en paramètres le type de l'élément auquel accéder, et son nom.
 Le type est défini comme une instance de l'interface \javacode{IInternalElementType<T extends IInternalElement>}, %
 sachant que les interfaces d'élément Event-B définissent chacune leur type à travers une variable statique \javacode{ELEMENT_TYPE}, instance de %
